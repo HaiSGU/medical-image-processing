@@ -2,6 +2,7 @@ import pydicom
 from pydicom import dcmread
 import os
 
+
 def anonymize_dicom(input_file_path, output_file_path, new_patient_name="Anonymous"):
     """
     Anonymizes a DICOM file by modifying patient-identifying metadata.
@@ -24,6 +25,7 @@ def anonymize_dicom(input_file_path, output_file_path, new_patient_name="Anonymo
     # Save the anonymized DICOM file
     ds.save_as(output_file_path)
     print(f"Anonymized DICOM saved to: {output_file_path}")
+
 
 if __name__ == "__main__":
     # Example usage
