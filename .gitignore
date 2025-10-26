@@ -29,15 +29,17 @@ env/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# Data files (large binary files)
-*.nrrd
-*.dcm
-*.mha
-*.nii
-*.npy
-*.tiff
-*.tif
-data/pathology/*
+# Data files (only large files in pathology)
+data/pathology/*.tiff
+data/pathology/*.tif
+data/pathology/*.svs
+
+# Large data files (optional - comment out if you want to track them)
+# *.nrrd
+# *.dcm
+# *.mha
+# *.nii
+# *.npy
 
 # IDE
 .vscode/

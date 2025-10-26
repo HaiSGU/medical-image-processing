@@ -1,0 +1,14 @@
+import numpy as np
+
+# Create a sinogram for a simple phantom of the head
+sinogram = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+                     [0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
+                     [0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+                     [0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+                     [0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
+                     [0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+
+# Save the sinogram to a .npy file
+np.save('data/medical/Schepp_Logan_sinogram 1.npy', sinogram)
