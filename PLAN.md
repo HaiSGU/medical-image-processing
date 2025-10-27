@@ -28,12 +28,12 @@ Frontend Application (Tuần 6-7):
 📊 TỔNG QUAN TIẾN ĐỘ
 Tuần	Giai đoạn	Modules	Deliverables	Status
 1	✅ Setup	Environment	Project structure, GitHub repo	Done
-2	🔄 Core Utils	File I/O, Image Utils	2 Python modules + demo scripts	Pending
-3	🔄 Processing	Anonymization, CT, MRI	3 Python modules + demo scripts	Pending
-4	🔄 Segmentation	Brain Segmentation	1 Python module + demo script	Pending
-5	🔄 Preprocessing	Image Transforms	1 Python module + demo script	Pending
-6	🔄 Web App P1	Basic Streamlit UI	Working web app (local)	Pending
-7	🔄 Web App P2	Advanced Features	Deployed web app (online)	Pending
+2	✅ Core Utils	File I/O, Image Utils	2 Python modules + demo scripts	Done
+3	🔄 Processing	Anonymization, CT, MRI	3 Python modules + demo scripts	Next
+4	⏳ Segmentation	Brain Segmentation	1 Python module + demo script	Pending
+5	⏳ Preprocessing	Image Transforms	1 Python module + demo script	Pending
+6	⏳ Web App P1	Basic Streamlit UI	Working web app (local)	Pending
+7	⏳ Web App P2	Advanced Features	Deployed web app (online)	Pending
 ✅ TUẦN 1: SETUP (HOÀN THÀNH)
 Đã làm xong:
  Tạo GitHub repository
@@ -45,34 +45,34 @@ Deliverables:
 ✅ Repository: https://github.com/HaiSGU/medical-image-processing
 ✅ Clean project structure
 ✅ Development environment ready
-🔄 TUẦN 2: CORE UTILITIES MODULE
+✅ TUẦN 2: CORE UTILITIES MODULE (HOÀN THÀNH)
 Mục tiêu: Xây dựng foundation - File I/O và Image utilities
 
-Ngày 1-3: File I/O Module
+✅ Ngày 1-3: File I/O Module (DONE)
 File: file_io.py
 
 Chức năng chính:
 
-Class MedicalImageIO để đọc/ghi ảnh y tế
-Support đa định dạng: NIfTI (.nii), DICOM (.dcm), NRRD (.nrrd), MetaImage (.mha), NumPy (.npy)
-Trích xuất metadata (spacing, origin, orientation, patient info)
-Error handling và logging
-Testing: Demo script demo_file_io.py
+✅ Class MedicalImageIO để đọc/ghi ảnh y tế
+✅ Support đa định dạng: NIfTI (.nii), DICOM (.dcm), NRRD (.nrrd), MetaImage (.mha), NumPy (.npy)
+✅ Trích xuất metadata (spacing, origin, orientation, patient info)
+✅ Error handling và logging
+✅ Testing: Demo script demo_file_io.py, demo_file_io_simple.py
 
-Commit: feat: implement MedicalImageIO with multi-format support
+Commit: feat: implement MedicalImageIO with multi-format support ✅
 
-Ngày 4-7: Image Utilities
+✅ Ngày 4-7: Image Utilities (DONE)
 File: image_utils.py
 
 Chức năng chính:
 
-Chuyển đổi giữa NumPy ↔ SimpleITK ↔ PIL
-Coordinate transformations (world ↔ voxel)
-Resampling (change spacing/size)
-Normalization và basic operations
-Testing: Demo script examples/demo_image_utils.py
+✅ Chuyển đổi giữa NumPy ↔ SimpleITK ↔ PIL
+✅ Coordinate transformations (world ↔ voxel)
+✅ Resampling (change spacing/size)
+✅ Normalization và basic operations
+✅ Testing: Demo script examples/demo_image_utils.py
 
-Commit: feat: add image utility functions
+Commit: feat: add image utility functions ✅
 
 Tuần 2 Deliverables:
 
@@ -449,14 +449,16 @@ Move on và come back later
 🚀 CURRENT STATUS & NEXT STEPS
 Current Progress:
 ✅ Week 1: Setup complete
-🔄 Week 2: Day 1-3 done (file_io.py complete)
-⏳ Week 2: Day 4-7 in progress
+✅ Week 2: Core Utilities complete (file_io.py + image_utils.py)
+⏳ Week 3: Processing Modules - NEXT
+
 Immediate Next Steps:
-✅ Implement image_utils.py
-✅ Create examples/demo_image_utils.py
-✅ Test manually
-✅ Commit code
-✅ Move to Week 3
+🔄 Implement DICOM Anonymization (dicom_anonymizer.py)
+🔄 Implement CT Reconstruction (ct_reconstruction.py)
+🔄 Implement MRI Reconstruction (mri_reconstruction.py)
+🔄 Create demo scripts for each module
+🔄 Commit and move to Week 4
+
 Focus Areas:
 Keep code simple and functional
 Don't over-engineer
