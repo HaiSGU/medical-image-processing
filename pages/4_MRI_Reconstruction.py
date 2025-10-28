@@ -23,7 +23,7 @@ from src.reconstruction.mri_reconstruction import MRIReconstructor
 from utils.file_io import MedicalImageIO
 
 # Page config
-st.set_page_config(page_title="MRI Reconstruction", page_icon="🧲", layout="wide")
+st.set_page_config(page_title="MRI Reconstruction", layout="wide")
 
 # Initialize session state
 if "mri_kspace" not in st.session_state:
@@ -34,11 +34,11 @@ if "mri_phase" not in st.session_state:
     st.session_state.mri_phase = None
 
 # Header
-st.title("🧲 MRI Reconstruction")
+st.title("MRI Reconstruction")
 st.markdown("Reconstruct MRI images from K-space data using FFT")
 
 # Info
-with st.expander("ℹ️ About MRI & K-space"):
+with st.expander("About MRI & K-space"):
     col1, col2 = st.columns(2)
 
     with col1:
@@ -80,7 +80,7 @@ st.markdown("---")
 
 # Sidebar controls
 with st.sidebar:
-    st.header("⚙️ Settings")
+    st.header("Settings")
 
     # Data source
     data_source = st.radio(
@@ -106,11 +106,11 @@ with st.sidebar:
             )
 
     st.markdown("---")
-    st.info("💡 Center of K-space contains most important information")
+    st.info("Center of K-space contains most important information")
 
 # Main content
 if data_source == "Generate from Image":
-    st.subheader("📤 Generate K-space from Image")
+    st.subheader("Generate K-space from Image")
 
     uploaded_file = st.file_uploader(
         "Upload image (.nii, .dcm, .nrrd, .mha, .npy)",
@@ -186,14 +186,14 @@ if data_source == "Generate from Image":
                     st.session_state.mri_magnitude = magnitude
                     st.session_state.mri_phase = phase
 
-                st.success("✅ Reconstruction complete!")
+                st.success("Reconstruction complete!")
 
         except Exception as e:
             st.error(f"❌ Error: {str(e)}")
             st.exception(e)
 
 else:  # Upload K-space
-    st.subheader("📤 Upload K-space Data")
+    st.subheader("Upload K-space Data")
 
     uploaded_kspace = st.file_uploader(
         "Choose K-space file (.npy)",
@@ -206,7 +206,7 @@ else:  # Upload K-space
             kspace = np.load(io.BytesIO(uploaded_kspace.getvalue()))
 
             if not np.iscomplexobj(kspace):
-                st.warning("⚠️ K-space should be complex. Converting to complex...")
+                st.warning("K-space should be complex. Converting to complex...")
                 kspace = kspace.astype(np.complex128)
 
             st.session_state.mri_kspace = kspace
@@ -228,7 +228,7 @@ else:  # Upload K-space
                     st.session_state.mri_magnitude = magnitude
                     st.session_state.mri_phase = phase
 
-                st.success("✅ Reconstruction complete!")
+                st.success("Reconstruction complete!")
 
         except Exception as e:
             st.error(f"❌ Error loading K-space: {str(e)}")
@@ -236,12 +236,12 @@ else:  # Upload K-space
 # Display results
 if st.session_state.mri_kspace is not None:
     st.markdown("---")
-    st.header("📊 Results")
+    st.header("Results")
 
     kspace = st.session_state.mri_kspace
 
     # Show K-space
-    st.subheader("📈 K-space (Frequency Domain)")
+    st.subheader("K-space (Frequency Domain)")
 
     # Log magnitude for better visualization
     kspace_log = np.log(np.abs(kspace) + 1)
@@ -262,7 +262,7 @@ if st.session_state.mri_kspace is not None:
     # Show reconstructed images
     if st.session_state.mri_magnitude is not None:
         st.markdown("---")
-        st.subheader("🖼️ Reconstructed Images")
+        st.subheader("Reconstructed Images")
 
         magnitude = st.session_state.mri_magnitude
         phase = st.session_state.mri_phase
@@ -297,7 +297,7 @@ if st.session_state.mri_kspace is not None:
 
         # Statistics
         st.markdown("---")
-        st.subheader("📈 Image Statistics")
+        st.subheader("Image Statistics")
 
         col1, col2, col3, col4 = st.columns(4)
 
@@ -308,7 +308,7 @@ if st.session_state.mri_kspace is not None:
 
         # Download
         st.markdown("---")
-        st.subheader("💾 Download")
+        st.subheader("Download")
 
         col1, col2, col3 = st.columns(3)
 
@@ -360,7 +360,7 @@ else:
     st.info("👆 Generate K-space or upload data to start")
 
     st.markdown("---")
-    st.subheader("📝 Quick Guide")
+    st.subheader("Quick Guide")
 
     st.markdown(
         """

@@ -23,7 +23,7 @@ sys.path.insert(0, str(project_root))
 from src.reconstruction.ct_reconstruction import CTReconstructor
 
 # Page config
-st.set_page_config(page_title="CT Reconstruction", page_icon="🔬", layout="wide")
+st.set_page_config(page_title="CT Reconstruction", layout="wide")
 
 
 # Helper functions
@@ -77,11 +77,11 @@ if "ct_reconstructed" not in st.session_state:
     st.session_state.ct_reconstructed = None
 
 # Header
-st.title("🔬 CT Reconstruction")
+st.title("CT Reconstruction")
 st.markdown("Reconstruct CT images from projection data (sinogram)")
 
 # Info
-with st.expander("ℹ️ About CT Reconstruction"):
+with st.expander("About CT Reconstruction"):
     col1, col2 = st.columns(2)
 
     with col1:
@@ -121,7 +121,7 @@ st.markdown("---")
 
 # Sidebar controls
 with st.sidebar:
-    st.header("⚙️ Settings")
+    st.header("Settings")
 
     # Data source
     data_source = st.radio(
@@ -160,7 +160,7 @@ with st.sidebar:
         )
 
     st.markdown("---")
-    st.info("💡 Try FBP with 'ramp' filter first for best results")
+    st.info("Try FBP with 'ramp' filter first for best results")
 
 # Main content
 if data_source == "Generate Phantom":
@@ -213,10 +213,10 @@ if data_source == "Generate Phantom":
 
             st.session_state.ct_reconstructed = reconstructed
 
-        st.success("✅ Reconstruction complete!")
+        st.success("Reconstruction complete!")
 
 else:  # Upload Sinogram
-    st.subheader("📤 Upload Sinogram")
+    st.subheader("Upload Sinogram")
 
     uploaded_file = st.file_uploader(
         "Choose sinogram file (.npy)",
@@ -252,7 +252,7 @@ else:  # Upload Sinogram
 
                     st.session_state.ct_reconstructed = reconstructed
 
-                st.success("✅ Reconstruction complete!")
+                st.success("Reconstruction complete!")
 
         except Exception as e:
             st.error(f"❌ Error loading sinogram: {str(e)}")
@@ -260,12 +260,12 @@ else:  # Upload Sinogram
 # Display results
 if st.session_state.ct_sinogram is not None:
     st.markdown("---")
-    st.header("📊 Results")
+    st.header("Results")
 
     sinogram = st.session_state.ct_sinogram
 
     # Show sinogram
-    st.subheader("📈 Sinogram (Projection Data)")
+    st.subheader("Sinogram (Projection Data)")
 
     fig, ax = plt.subplots(figsize=(10, 6))
     im = ax.imshow(sinogram, cmap="gray", aspect="auto")
@@ -281,7 +281,7 @@ if st.session_state.ct_sinogram is not None:
     # Show reconstruction if available
     if st.session_state.ct_reconstructed is not None:
         st.markdown("---")
-        st.subheader("🔬 Reconstructed CT Image")
+        st.subheader("Reconstructed CT Image")
 
         reconstructed = st.session_state.ct_reconstructed
 
@@ -307,7 +307,7 @@ if st.session_state.ct_sinogram is not None:
         # Quality metrics (if phantom available)
         if st.session_state.ct_phantom is not None:
             st.markdown("---")
-            st.subheader("📈 Quality Metrics")
+            st.subheader("Quality Metrics")
 
             phantom = st.session_state.ct_phantom
 
@@ -356,7 +356,7 @@ if st.session_state.ct_sinogram is not None:
 
         # Download
         st.markdown("---")
-        st.subheader("💾 Download")
+        st.subheader("Download")
 
         col1, col2 = st.columns(2)
 
@@ -395,7 +395,7 @@ else:
     st.info("👆 Generate phantom or upload sinogram to start")
 
     st.markdown("---")
-    st.subheader("📝 Quick Guide")
+    st.subheader("Quick Guide")
 
     st.markdown(
         """

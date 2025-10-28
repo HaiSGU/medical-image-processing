@@ -24,14 +24,14 @@ from src.anonymization.dicom_anonymizer import DICOMAnonymizer
 import pydicom
 
 # Page config
-st.set_page_config(page_title="DICOM Anonymization", page_icon="🔒", layout="wide")
+st.set_page_config(page_title="DICOM Anonymization", layout="wide")
 
 # Header
-st.title("🔒 DICOM Anonymization")
+st.title("DICOM Anonymization")
 st.markdown("Remove patient information from DICOM files")
 
 # Info box
-with st.expander("ℹ️ What gets removed?"):
+with st.expander("What gets removed?"):
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(
@@ -56,16 +56,16 @@ st.markdown("---")
 
 # Sidebar settings
 with st.sidebar:
-    st.header("⚙️ Settings")
+    st.header("Settings")
 
     patient_prefix = st.text_input(
         "Anonymous ID Prefix", value="ANON", help="Prefix for new patient IDs"
     )
 
-    st.info("💡 Uploaded files will be anonymized and available for download as ZIP")
+    st.info("Uploaded files will be anonymized and available for download as ZIP")
 
 # File upload
-st.subheader("📤 Upload DICOM Files")
+st.subheader("Upload DICOM Files")
 
 uploaded_files = st.file_uploader(
     "Choose DICOM files (.dcm)",
@@ -78,7 +78,7 @@ if uploaded_files:
     st.success(f"✅ Uploaded {len(uploaded_files)} file(s)")
 
     # Show preview of first file
-    st.subheader("👁️ Preview: Original Metadata")
+    st.subheader("Preview: Original Metadata")
 
     try:
         # Read first file
@@ -176,7 +176,7 @@ if uploaded_files:
                     st.markdown("---")
 
                     # Create ZIP file for download
-                    st.subheader("💾 Download Anonymized Files")
+                    st.subheader("Download Anonymized Files")
 
                     zip_buffer = io.BytesIO()
                     with zipfile.ZipFile(
@@ -225,7 +225,7 @@ if uploaded_files:
                             st.text(f"Name: {anon_dicom.get('InstitutionName', 'N/A')}")
                             st.text(f"Station: {anon_dicom.get('StationName', 'N/A')}")
 
-                        st.success("✅ All PHI removed successfully!")
+                        st.success("All PHI removed successfully!")
 
             except Exception as e:
                 st.error(f"❌ Error: {str(e)}")
@@ -236,7 +236,7 @@ else:
 
     # Example
     st.markdown("---")
-    st.subheader("📝 How to use:")
+    st.subheader("How to use:")
     st.markdown(
         """
     1. Click "Browse files" above

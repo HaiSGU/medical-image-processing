@@ -25,7 +25,7 @@ from src.segmentation.brain_segmentation import BrainSegmentation
 from utils.file_io import MedicalImageIO
 
 # Page config
-st.set_page_config(page_title="Brain Segmentation", page_icon="🧠", layout="wide")
+st.set_page_config(page_title="Brain Segmentation", layout="wide")
 
 # Initialize session state
 if "seg_image_data" not in st.session_state:
@@ -36,11 +36,11 @@ if "seg_metadata" not in st.session_state:
     st.session_state.seg_metadata = {}
 
 # Header
-st.title("🧠 Brain Segmentation")
+st.title("Brain Segmentation")
 st.markdown("Extract brain regions from medical images")
 
 # Info
-with st.expander("ℹ️ Segmentation Methods"):
+with st.expander("Segmentation Methods"):
     col1, col2 = st.columns(2)
 
     with col1:
@@ -77,7 +77,7 @@ st.markdown("---")
 
 # Sidebar controls
 with st.sidebar:
-    st.header("⚙️ Segmentation Settings")
+    st.header("Segmentation Settings")
 
     method = st.selectbox(
         "Method",
@@ -133,10 +133,10 @@ with st.sidebar:
     )
 
     st.markdown("---")
-    st.info("💡 Try 'Automatic' method first for best results")
+    st.info("Try 'Automatic' method first for best results")
 
 # File upload
-st.subheader("📤 Upload Medical Image")
+st.subheader("Upload Medical Image")
 
 uploaded_file = st.file_uploader(
     "Choose a file (.nii, .nii.gz, .dcm, .nrrd, .mha, .npy)",
@@ -239,7 +239,7 @@ if uploaded_file:
                 # Store in session state
                 st.session_state.seg_mask = mask
 
-                st.success("✅ Segmentation complete!")
+                st.success("Segmentation complete!")
 
             except Exception as e:
                 st.error(f"❌ Segmentation failed: {str(e)}")
@@ -249,7 +249,7 @@ if uploaded_file:
     # Display results
     if st.session_state.seg_mask is not None:
         st.markdown("---")
-        st.header("📊 Segmentation Results")
+        st.header("Segmentation Results")
 
         image_data = st.session_state.seg_image_data
         mask = st.session_state.seg_mask
@@ -269,7 +269,7 @@ if uploaded_file:
         st.markdown("---")
 
         # Visualization
-        st.subheader("🖼️ Visualization")
+        st.subheader("Visualization")
 
         # View controls
         if image_data.ndim == 3:
@@ -343,7 +343,7 @@ if uploaded_file:
 
         # Download options
         st.markdown("---")
-        st.subheader("💾 Download Results")
+        st.subheader("Download Results")
 
         col1, col2 = st.columns(2)
 
@@ -395,7 +395,7 @@ else:
     st.info("👆 Upload a brain image to start segmentation")
 
     st.markdown("---")
-    st.subheader("📝 Quick Guide")
+    st.subheader("Quick Guide")
 
     st.markdown(
         """
