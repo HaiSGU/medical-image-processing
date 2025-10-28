@@ -18,6 +18,10 @@ scikit-learn>=1.0.0
 # Visualization
 ipywidgets>=7.6.0
 
+#stramlit for web apps
+streamlit>=1.28.0
+plotly>=5.17.0  # For interactive plots
+
 # Jupyter
 jupyter>=1.0.0
 ipykernel>=6.0.0
