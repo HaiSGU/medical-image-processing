@@ -1,10 +1,10 @@
 """
-CT Reconstruction Page
+Trang Tái tạo CT
 
-Reconstruct CT images from sinograms using FBP and SART algorithms.
+Tái tạo ảnh CT từ sinogram sử dụng thuật toán FBP và SART.
 
-Author: HaiSGU
-Date: 2025-10-28
+Tác giả: HaiSGU
+Ngày: 2025-10-28
 """
 
 import streamlit as st
@@ -23,7 +23,7 @@ sys.path.insert(0, str(project_root))
 from src.reconstruction.ct_reconstruction import CTReconstructor
 
 # Page config
-st.set_page_config(page_title="CT Reconstruction", layout="wide")
+st.set_page_config(page_title="🔬 Tái tạo CT", layout="wide")
 
 
 # Helper functions
@@ -77,43 +77,43 @@ if "ct_reconstructed" not in st.session_state:
     st.session_state.ct_reconstructed = None
 
 # Header
-st.title("CT Reconstruction")
-st.markdown("Reconstruct CT images from projection data (sinogram)")
+st.title("🔬 Tái tạo CT")
+st.markdown("Tái tạo ảnh CT từ dữ liệu chiếu (sinogram)")
 
 # Info
-with st.expander("About CT Reconstruction"):
+with st.expander("📚 Về Tái tạo CT"):
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown(
             """
-        **What is CT Reconstruction?**
+        **Tái tạo CT là gì?**
         
-        CT scanners rotate X-ray source around patient, 
-        capturing projections at different angles.
+        Máy CT quay nguồn tia X quanh bệnh nhân,
+        chụp hình chiếu ở các góc khác nhau.
         
-        **Sinogram:** Collection of all projections
-        - Each row = one angle
-        - Contains projection data
+        **Sinogram:** Tập hợp tất cả hình chiếu
+        - Mỗi hàng = một góc
+        - Chứa dữ liệu chiếu
         
-        **Reconstruction:** Convert sinogram → CT image
+        **Tái tạo:** Chuyển sinogram → ảnh CT
         """
         )
 
     with col2:
         st.markdown(
             """
-        **Algorithms:**
+        **Thuật toán:**
         
-        **FBP (Filtered Back Projection):**
-        - Fast (clinical standard)
-        - Various filters available
-        - Good for full data
+        **FBP (Chiếu ngược có lọc):**
+        - Nhanh (tiêu chuẩn lâm sàng)
+        - Nhiều bộ lọc khả dụng
+        - Tốt cho dữ liệu đầy đủ
         
-        **SART (Iterative):**
-        - Slower but better quality
-        - Good for sparse data
-        - Reduces noise
+        **SART (Lặp):**
+        - Chậm hơn nhưng chất lượng tốt hơn
+        - Tốt cho dữ liệu thưa
+        - Giảm nhiễu
         """
         )
 
@@ -121,107 +121,109 @@ st.markdown("---")
 
 # Sidebar controls
 with st.sidebar:
-    st.header("Settings")
+    st.header("⚙️ Cài đặt")
 
     # Data source
     data_source = st.radio(
-        "Data Source:",
-        ["Generate Phantom", "Upload Sinogram"],
-        help="Use phantom for demo or upload real data",
+        "Nguồn dữ liệu:",
+        ["Tạo Phantom", "Tải lên Sinogram"],
+        help="Dùng phantom cho demo hoặc tải lên dữ liệu thật",
     )
 
     st.markdown("---")
 
     # Reconstruction method
-    method = st.selectbox("Method:", ["FBP", "SART"], help="Reconstruction algorithm")
+    method = st.selectbox("Phương pháp:", ["FBP", "SART"], help="Thuật toán tái tạo")
 
     if method == "FBP":
         filter_type = st.selectbox(
-            "Filter:",
+            "Bộ lọc:",
             ["ramp", "shepp-logan", "cosine", "hamming"],
-            help="Filter for FBP reconstruction",
+            help="Bộ lọc cho tái tạo FBP",
         )
     else:
         num_iterations = st.slider(
-            "Iterations:",
+            "Số lần lặp:",
             min_value=1,
             max_value=50,
             value=10,
-            help="Number of SART iterations",
+            help="Số lần lặp SART",
         )
 
         relaxation = st.slider(
-            "Relaxation:",
+            "Hệ số thư giãn:",
             min_value=0.1,
             max_value=1.0,
             value=0.5,
             step=0.1,
-            help="SART relaxation factor",
+            help="Hệ số thư giãn SART",
         )
 
     st.markdown("---")
-    st.info("Try FBP with 'ramp' filter first for best results")
+    st.info("💡 Thử FBP với bộ lọc 'ramp' trước để có kết quả tốt nhất")
 
 # Main content
-if data_source == "Generate Phantom":
+if data_source == "Tạo Phantom":
     st.subheader("🎯 Shepp-Logan Phantom")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        phantom_size = st.slider("Phantom size:", 64, 512, 256, step=64)
-        num_angles = st.slider("Number of angles:", 30, 360, 180, step=30)
+        phantom_size = st.slider("Kích thước Phantom:", 64, 512, 256, step=64)
+        num_angles = st.slider("Số góc:", 30, 360, 180, step=30)
 
     with col2:
         st.markdown(
             """
         **Shepp-Logan Phantom:**
-        - Standard test image for CT
-        - Contains ellipses of different densities
-        - Perfect for algorithm testing
+        - Ảnh test chuẩn cho CT
+        - Chứa các hình elip có mật độ khác nhau
+        - Hoàn hảo để test thuật toán
         """
         )
 
-    if st.button("🔬 Generate & Reconstruct", type="primary", use_container_width=True):
+    if st.button("🔬 Tạo & Tái tạo", type="primary", use_container_width=True):
 
-        with st.spinner("Generating phantom and sinogram..."):
+        with st.spinner("Đang tạo phantom và sinogram..."):
             # Create phantom
             phantom = create_shepp_logan_phantom(phantom_size)
             st.session_state.ct_phantom = phantom
 
-            # Create reconstructor
-            reconstructor = CTReconstructor()
+            # Generate sinogram using radon transform
+            from skimage.transform import radon
 
-            # Generate sinogram
             angles = np.linspace(0, 180, num_angles, endpoint=False)
-            sinogram = reconstructor.create_sinogram(phantom, angles)
+            sinogram_raw = radon(phantom, theta=angles)
+            # radon returns (num_detectors, num_angles)
+            # CTReconstructor expects (num_angles, num_detectors)
+            sinogram = sinogram_raw.T
             st.session_state.ct_sinogram = sinogram
 
-        with st.spinner(f"Reconstructing using {method}..."):
+        with st.spinner(f"Đang tái tạo sử dụng {method}..."):
+            # Create reconstructor with sinogram
+            reconstructor = CTReconstructor(sinogram, theta=angles)
+
             # Reconstruct
             if method == "FBP":
-                reconstructed = reconstructor.fbp_reconstruction(
-                    sinogram, filter_name=filter_type
-                )
+                reconstructed = reconstructor.reconstruct_fbp(filter_name=filter_type)
             else:  # SART
-                reconstructed = reconstructor.sart_reconstruction(
-                    sinogram,
+                reconstructed = reconstructor.reconstruct_sart(
+                    iterations=num_iterations,
+                    relaxation=relaxation,
                     image_size=phantom_size,
-                    num_iterations=num_iterations,
-                    relaxation_factor=relaxation,
                 )
 
             st.session_state.ct_reconstructed = reconstructed
 
-        st.success("Reconstruction complete!")
+        st.success("✅ Tái tạo hoàn tất!")
 
 else:  # Upload Sinogram
-    st.subheader("Upload Sinogram")
+    st.subheader("📤 Tải lên Sinogram")
 
     uploaded_file = st.file_uploader(
-        "Choose sinogram file (.npy)",
+        "Chọn file sinogram (.npy)",
         type=["npy"],
-        help="NumPy array containing projection data",
+        help="Mảng NumPy chứa dữ liệu chiếu",
     )
 
     if uploaded_file:
@@ -232,27 +234,31 @@ else:  # Upload Sinogram
             st.success(f"✅ Loaded sinogram: {sinogram.shape}")
 
             # Reconstruct button
-            if st.button("🔬 Reconstruct", type="primary", use_container_width=True):
+            if st.button("🔬 Tái tạo", type="primary", use_container_width=True):
 
-                with st.spinner(f"Reconstructing using {method}..."):
-                    reconstructor = CTReconstructor()
+                with st.spinner(f"Đang tái tạo sử dụng {method}..."):
+                    # Create angles for reconstruction
+                    num_angles = sinogram.shape[0]
+                    angles = np.linspace(0, 180, num_angles, endpoint=False)
+
+                    # Create reconstructor with sinogram
+                    reconstructor = CTReconstructor(sinogram, theta=angles)
 
                     if method == "FBP":
-                        reconstructed = reconstructor.fbp_reconstruction(
-                            sinogram, filter_name=filter_type
+                        reconstructed = reconstructor.reconstruct_fbp(
+                            filter_name=filter_type
                         )
                     else:  # SART
                         image_size = sinogram.shape[1]
-                        reconstructed = reconstructor.sart_reconstruction(
-                            sinogram,
+                        reconstructed = reconstructor.reconstruct_sart(
+                            iterations=num_iterations,
+                            relaxation=relaxation,
                             image_size=image_size,
-                            num_iterations=num_iterations,
-                            relaxation_factor=relaxation,
                         )
 
                     st.session_state.ct_reconstructed = reconstructed
 
-                st.success("Reconstruction complete!")
+                st.success("✅ Tái tạo hoàn tất!")
 
         except Exception as e:
             st.error(f"❌ Error loading sinogram: {str(e)}")

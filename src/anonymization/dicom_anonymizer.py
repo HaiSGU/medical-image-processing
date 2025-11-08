@@ -8,12 +8,10 @@ Author: HaiSGU
 Date: 2025-10-27
 """
 
-import os
 import logging
 from pathlib import Path
-from typing import List, Dict, Optional, Union
+from typing import Dict, Union
 import hashlib
-from datetime import datetime
 
 import pydicom
 from pydicom.dataset import Dataset
@@ -63,16 +61,20 @@ class DICOMAnonymizer:
         "InstanceCreationTime",
     ]
 
-    def __init__(self, prefix: str = "ANON"):
+    def __init__(self, prefix: str = "ANON", **kwargs):
         """
         Initialize DICOM Anonymizer.
 
         Args:
             prefix: Prefix for anonymous IDs (default: "ANON")
         """
+        if "patient_id_prefix" in kwargs and kwargs["patient_id_prefix"]:
+            prefix = str(kwargs["patient_id_prefix"])
+
         self.prefix = prefix
-        self.anonymization_map = {}  # Store original ID -> anonymous ID mapping
-        logger.info(f"DICOMAnonymizer initialized with prefix: {prefix}")
+        # Track original IDs that have been anonymized
+        self.anonymization_map = {}
+        logger.info("DICOMAnonymizer initialized with prefix: %s", prefix)
 
     def _generate_anonymous_id(self, original_id: str) -> str:
         """
@@ -102,7 +104,8 @@ class DICOMAnonymizer:
 
         Args:
             dataset: PyDICOM dataset
-            keep_descriptive: Keep descriptive tags like Modality, StudyDescription
+            keep_descriptive: Keep descriptive tags like Modality or
+                StudyDescription
 
         Returns:
             Anonymized dataset
@@ -134,19 +137,11 @@ class DICOMAnonymizer:
         if hasattr(dataset, "SeriesDate"):
             dataset.SeriesDate = "20000101"
 
-        # Keep descriptive information if requested
-        if keep_descriptive:
-            # These are safe and useful for analysis
-            descriptive_tags = [
-                "Modality",
-                "StudyDescription",
-                "SeriesDescription",
-                "BodyPartExamined",
-                "ImageType",
-            ]
-            # These tags are preserved
-
-        logger.info(f"Anonymized dataset: {original_patient_id} → {anonymous_id}")
+        logger.info(
+            "Anonymized dataset: %s -> %s",
+            original_patient_id,
+            anonymous_id,
+        )
 
         return dataset
 
@@ -180,22 +175,25 @@ class DICOMAnonymizer:
         # Create output directory if needed
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        logger.info(f"Anonymizing: {input_path} → {output_path}")
+        logger.info("Anonymizing %s -> %s", input_path, output_path)
 
         try:
             # Read DICOM
             dataset = pydicom.dcmread(str(input_path))
 
             # Anonymize
-            anonymized_dataset = self.anonymize_dataset(dataset, keep_descriptive)
+            anonymized_dataset = self.anonymize_dataset(
+                dataset,
+                keep_descriptive,
+            )
 
             # Save
             anonymized_dataset.save_as(str(output_path))
 
-            logger.info(f"✅ Successfully anonymized: {output_path}")
+            logger.info("Successfully anonymized %s", output_path)
 
         except Exception as e:
-            logger.error(f"❌ Error anonymizing file: {e}")
+            logger.error("Error anonymizing file: %s", e)
             raise
 
     def anonymize_directory(
@@ -204,7 +202,7 @@ class DICOMAnonymizer:
         output_dir: Union[str, Path],
         keep_descriptive: bool = True,
         recursive: bool = True,
-    ) -> Dict[str, int]:
+    ) -> Dict[str, Union[int, Dict[str, str]]]:
         """
         Anonymize all DICOM files in a directory.
 
@@ -215,12 +213,23 @@ class DICOMAnonymizer:
             recursive: Process subdirectories recursively
 
         Returns:
-            Dictionary with statistics: {'processed': N, 'failed': M}
+            Dictionary with statistics:
+                {
+                    'processed': N,
+                    'failed': M,
+                    'successful': N,
+                    'id_mapping': {original: anonymized, ...}
+                }
 
         Examples:
             >>> anonymizer = DICOMAnonymizer()
             >>> stats = anonymizer.anonymize_directory('input/', 'output/')
-            >>> print(f"Processed: {stats['processed']}, Failed: {stats['failed']}")
+            >>> print(
+            ...     "Processed: {processed}, Failed: {failed}".format(
+            ...         processed=stats['processed'],
+            ...         failed=stats['failed'],
+            ...     )
+            ... )
         """
         input_dir = Path(input_dir)
         output_dir = Path(output_dir)
@@ -238,7 +247,7 @@ class DICOMAnonymizer:
         else:
             dicom_files = list(input_dir.glob("*.dcm"))
 
-        logger.info(f"Found {len(dicom_files)} DICOM files to anonymize")
+        logger.info("Found %d DICOM files to anonymize", len(dicom_files))
 
         for input_file in dicom_files:
             # Compute relative path
@@ -249,11 +258,18 @@ class DICOMAnonymizer:
                 self.anonymize_file(input_file, output_file, keep_descriptive)
                 stats["processed"] += 1
             except Exception as e:
-                logger.error(f"Failed to anonymize {input_file}: {e}")
+                logger.error("Failed to anonymize %s: %s", input_file, e)
                 stats["failed"] += 1
 
-        logger.info(f"Batch anonymization complete: {stats}")
-        return stats
+        result = {
+            "processed": stats["processed"],
+            "failed": stats["failed"],
+            "successful": stats["processed"],
+            "id_mapping": self.get_anonymization_map(),
+        }
+
+        logger.info("Batch anonymization complete: %s", result)
+        return result
 
     def verify_anonymization(self, file_path: Union[str, Path]) -> bool:
         """
@@ -290,14 +306,14 @@ class DICOMAnonymizer:
                         phi_found.append(f"{tag}={value}")
 
             if phi_found:
-                logger.warning(f"PHI found in {file_path}: {phi_found}")
+                logger.warning("PHI found in %s: %s", file_path, phi_found)
                 return False
             else:
-                logger.info(f"✅ File is properly anonymized: {file_path}")
+                logger.info("File is properly anonymized: %s", file_path)
                 return True
 
         except Exception as e:
-            logger.error(f"Error verifying file: {e}")
+            logger.error("Error verifying file: %s", e)
             return False
 
     def get_anonymization_map(self) -> Dict[str, str]:
@@ -310,7 +326,9 @@ class DICOMAnonymizer:
         return self.anonymization_map.copy()
 
     def compare_before_after(
-        self, original_path: Union[str, Path], anonymized_path: Union[str, Path]
+        self,
+        original_path: Union[str, Path],
+        anonymized_path: Union[str, Path],
     ) -> Dict:
         """
         Compare original and anonymized DICOM files.
@@ -353,7 +371,9 @@ class DICOMAnonymizer:
 
 # Convenience function
 def anonymize_dicom(
-    input_path: Union[str, Path], output_path: Union[str, Path], prefix: str = "ANON"
+    input_path: Union[str, Path],
+    output_path: Union[str, Path],
+    prefix: str = "ANON",
 ) -> None:
     """
     Convenience function to anonymize a single DICOM file.

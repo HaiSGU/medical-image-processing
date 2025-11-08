@@ -1,253 +1,206 @@
-"""
-DICOM Anonymization Page
+"""Trang Streamlit để ẩn danh hóa các file DICOM."""
 
-Remove Protected Health Information (PHI) from DICOM files.
-
-Author: HaiSGU
-Date: 2025-10-28
-"""
-
-import streamlit as st
-import tempfile
-from pathlib import Path
-import sys
-import zipfile
 import io
+import sys
+import tempfile
+import zipfile
+from pathlib import Path
+from typing import Dict
+
 import pandas as pd
-
-# Add project root to path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-
-# Import from src/ modules
-from src.anonymization.dicom_anonymizer import DICOMAnonymizer
 import pydicom
+import streamlit as st
+from pydicom.dataset import Dataset
 
-# Page config
-st.set_page_config(page_title="DICOM Anonymization", layout="wide")
+PROJECT_ROOT = Path(__file__).parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-# Header
-st.title("DICOM Anonymization")
-st.markdown("Remove patient information from DICOM files")
 
-# Info box
-with st.expander("What gets removed?"):
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown(
-            """
-        **Patient Info:**
-        - Patient Name, ID
-        - Birth Date, Age, Sex
-        - Address, Phone
-        """
-        )
-    with col2:
-        st.markdown(
-            """
-        **Study Info:**
-        - Study Date/Time
-        - Institution Name
-        - Physician Name
-        """
-        )
+def format_tag(dataset: Dataset, tag: str, label: str) -> str:
+    value = dataset.get(tag, "N/A")
+    return f"{label}: {value}"
 
-st.markdown("---")
 
-# Sidebar settings
-with st.sidebar:
-    st.header("Settings")
+def render_metadata(dataset: Dataset) -> None:
+    column_patient, column_study, column_site = st.columns(3)
 
-    patient_prefix = st.text_input(
-        "Anonymous ID Prefix", value="ANON", help="Prefix for new patient IDs"
+    with column_patient:
+        st.markdown("**Bệnh nhân**")
+        st.text(format_tag(dataset, "PatientName", "Tên"))
+        st.text(format_tag(dataset, "PatientID", "ID"))
+        st.text(format_tag(dataset, "PatientBirthDate", "Ngày sinh"))
+
+    with column_study:
+        st.markdown("**Nghiên cứu**")
+        st.text(format_tag(dataset, "StudyDate", "Ngày"))
+        st.text(format_tag(dataset, "StudyTime", "Giờ"))
+        st.text(format_tag(dataset, "Modality", "Phương thức"))
+
+    with column_site:
+        st.markdown("**Cơ sở**")
+        st.text(format_tag(dataset, "InstitutionName", "Tên"))
+        st.text(format_tag(dataset, "StationName", "Trạm"))
+
+
+def show_mapping(mapping: Dict[str, str]) -> None:
+    if not mapping:
+        return
+
+    st.subheader("🔑 Bảng ánh xạ ID")
+    frame = pd.DataFrame(
+        {
+            "ID Gốc": list(mapping.keys()),
+            "ID Ẩn danh": list(mapping.values()),
+        }
+    )
+    st.dataframe(frame, use_container_width=True)
+
+    csv_bytes = frame.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="📥 Tải bảng ánh xạ ID (CSV)",
+        data=csv_bytes,
+        file_name="bang_anh_xa_id.csv",
+        mime="text/csv",
     )
 
-    st.info("Uploaded files will be anonymized and available for download as ZIP")
 
-# File upload
-st.subheader("Upload DICOM Files")
+def download_anonymized(output_dir: Path) -> None:
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+        for file_path in output_dir.glob("*.dcm"):
+            archive.write(file_path, file_path.name)
 
-uploaded_files = st.file_uploader(
-    "Choose DICOM files (.dcm)",
+    zip_buffer.seek(0)
+    st.download_button(
+        label="📥 Tải file đã ẩn danh (ZIP)",
+        data=zip_buffer,
+        file_name="dicom_da_an_danh.zip",
+        mime="application/zip",
+        use_container_width=True,
+    )
+
+
+st.set_page_config(page_title="🔒 Ẩn danh hóa DICOM", layout="wide")
+st.title("🔒 Ẩn danh hóa DICOM")
+st.markdown("Xóa thông tin bệnh nhân khỏi file DICOM để bảo mật dữ liệu y tế.")
+
+with st.expander("📋 Những thông tin nào sẽ bị xóa?"):
+    column_left, column_right = st.columns(2)
+    with column_left:
+        st.markdown(
+            """
+            **Thông tin bệnh nhân**
+            - Tên và mã định danh
+            - Ngày sinh, tuổi, giới tính
+            - Địa chỉ và liên lạc
+            """
+        )
+    with column_right:
+        st.markdown(
+            """
+            **Thông tin nghiên cứu**
+            - Ngày giờ nghiên cứu
+            - Tên cơ sở y tế
+            - Bác sĩ giới thiệu
+            """
+        )
+
+st.sidebar.header("⚙️ Cài đặt")
+patient_prefix = st.sidebar.text_input(
+    "Tiền tố ID ẩn danh",
+    value="ANON",
+    help="Tiền tố cho mã định danh được tạo tự động.",
+)
+st.sidebar.info("File sẽ được ẩn danh và trả về dưới dạng file ZIP.")
+
+st.subheader("📤 Tải lên file DICOM")
+uploads = st.file_uploader(
+    "Chọn file DICOM",
     type=["dcm"],
     accept_multiple_files=True,
-    help="Select one or more DICOM files",
+    help="Bạn có thể tải lên một hoặc nhiều file DICOM.",
 )
 
-if uploaded_files:
-    st.success(f"✅ Uploaded {len(uploaded_files)} file(s)")
-
-    # Show preview of first file
-    st.subheader("Preview: Original Metadata")
+if uploads:
+    st.success(f"✅ Đã nhận {len(uploads)} file.")
 
     try:
-        # Read first file
-        first_file = uploaded_files[0]
-        dicom_data = pydicom.dcmread(io.BytesIO(first_file.getvalue()))
-
-        # Show important tags
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-            st.markdown("**Patient:**")
-            st.text(f"Name: {dicom_data.get('PatientName', 'N/A')}")
-            st.text(f"ID: {dicom_data.get('PatientID', 'N/A')}")
-            st.text(f"Birth: {dicom_data.get('PatientBirthDate', 'N/A')}")
-
-        with col2:
-            st.markdown("**Study:**")
-            st.text(f"Date: {dicom_data.get('StudyDate', 'N/A')}")
-            st.text(f"Time: {dicom_data.get('StudyTime', 'N/A')}")
-            st.text(f"Modality: {dicom_data.get('Modality', 'N/A')}")
-
-        with col3:
-            st.markdown("**Institution:**")
-            st.text(f"Name: {dicom_data.get('InstitutionName', 'N/A')}")
-            st.text(f"Station: {dicom_data.get('StationName', 'N/A')}")
-
-    except Exception as e:
-        st.warning(f"Could not read metadata: {str(e)}")
+        preview = pydicom.dcmread(io.BytesIO(uploads[0].getvalue()), force=True)
+        render_metadata(preview)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        st.warning(f"⚠️ Không thể đọc metadata: {exc}")
 
     st.markdown("---")
 
-    # Anonymize button
-    if st.button("🔒 Anonymize Files", type="primary", use_container_width=True):
-
-        with st.spinner("Processing..."):
+    if st.button("🔒 Ẩn danh hóa file", use_container_width=True, type="primary"):
+        with st.spinner("Đang ẩn danh hóa file..."):
             try:
-                # Create temp directories
                 with tempfile.TemporaryDirectory() as tmp_dir:
-                    tmp_path = Path(tmp_dir)
-                    input_dir = tmp_path / "input"
-                    output_dir = tmp_path / "output"
+                    tmp_root = Path(tmp_dir)
+                    input_dir = tmp_root / "input"
+                    output_dir = tmp_root / "output"
                     input_dir.mkdir()
                     output_dir.mkdir()
 
-                    # Progress bar
-                    progress_bar = st.progress(0)
+                    progress = st.progress(0)
+                    total = len(uploads) or 1
+                    for index, upload in enumerate(uploads, start=1):
+                        target_path = input_dir / upload.name
+                        target_path.write_bytes(upload.getvalue())
+                        progress.progress(index / total)
 
-                    # Save uploaded files
-                    for idx, uploaded_file in enumerate(uploaded_files):
-                        file_path = input_dir / uploaded_file.name
-                        file_path.write_bytes(uploaded_file.getvalue())
-                        progress_bar.progress((idx + 1) / (len(uploaded_files) * 2))
-
-                    # Anonymize
-                    anonymizer = DICOMAnonymizer(patient_id_prefix=patient_prefix)
-                    results = anonymizer.anonymize_directory(
-                        str(input_dir), str(output_dir)
+                    # Import locally to avoid module-level path adjustments.
+                    # pylint: disable=import-outside-toplevel
+                    from src.anonymization.dicom_anonymizer import (
+                        DICOMAnonymizer,
                     )
 
-                    progress_bar.progress(1.0)
-
-                    # Show results
-                    st.success(
-                        f"""
-                    ✅ **Anonymization Complete!**
-                    
-                    - Success: {results['successful']} files
-                    - Failed: {results['failed']} files
-                    - Patients: {len(results['id_mapping'])}
-                    """
+                    anonymizer = DICOMAnonymizer(prefix=patient_prefix)
+                    stats = anonymizer.anonymize_directory(
+                        str(input_dir),
+                        str(output_dir),
                     )
+                    progress.progress(1.0)
 
-                    # ID Mapping Table
-                    if results["id_mapping"]:
-                        st.subheader("🔑 ID Mapping")
+                    successes = int(stats.get("successful", 0))
+                    failures = int(stats.get("failed", 0))
+                    mapping = stats.get("id_mapping", {})
 
-                        df_mapping = pd.DataFrame(
-                            {
-                                "Original ID": list(results["id_mapping"].keys()),
-                                "Anonymous ID": list(results["id_mapping"].values()),
-                            }
-                        )
+                    message = (
+                        "Ẩn danh hóa hoàn tất. Thành công: {} | Thất bại: {} | "
+                        "Số bệnh nhân: {}"
+                    ).format(successes, failures, len(mapping))
+                    st.success(message)
 
-                        st.dataframe(df_mapping, use_container_width=True)
-
-                        # Download mapping CSV
-                        csv = df_mapping.to_csv(index=False)
-                        st.download_button(
-                            label="📥 Download ID Mapping (CSV)",
-                            data=csv,
-                            file_name="id_mapping.csv",
-                            mime="text/csv",
-                        )
-
+                    show_mapping(mapping)
                     st.markdown("---")
+                    st.subheader("📥 Tải file đã ẩn danh")
+                    download_anonymized(output_dir)
 
-                    # Create ZIP file for download
-                    st.subheader("Download Anonymized Files")
-
-                    zip_buffer = io.BytesIO()
-                    with zipfile.ZipFile(
-                        zip_buffer, "w", zipfile.ZIP_DEFLATED
-                    ) as zip_file:
-                        for file_path in output_dir.glob("*.dcm"):
-                            zip_file.write(file_path, file_path.name)
-
-                    zip_buffer.seek(0)
-
-                    st.download_button(
-                        label="📥 Download Anonymized Files (ZIP)",
-                        data=zip_buffer,
-                        file_name="anonymized_dicoms.zip",
-                        mime="application/zip",
-                        type="primary",
-                        use_container_width=True,
-                    )
-
-                    # Show preview of anonymized file
-                    st.markdown("---")
-                    st.subheader("✅ Preview: Anonymized Metadata")
-
-                    anon_files = list(output_dir.glob("*.dcm"))
-                    if anon_files:
-                        anon_dicom = pydicom.dcmread(str(anon_files[0]))
-
-                        col1, col2, col3 = st.columns(3)
-
-                        with col1:
-                            st.markdown("**Patient:**")
-                            st.text(f"Name: {anon_dicom.get('PatientName', 'N/A')}")
-                            st.text(f"ID: {anon_dicom.get('PatientID', 'N/A')}")
-                            st.text(
-                                f"Birth: {anon_dicom.get('PatientBirthDate', 'N/A')}"
-                            )
-
-                        with col2:
-                            st.markdown("**Study:**")
-                            st.text(f"Date: {anon_dicom.get('StudyDate', 'N/A')}")
-                            st.text(f"Time: {anon_dicom.get('StudyTime', 'N/A')}")
-                            st.text(f"Modality: {anon_dicom.get('Modality', 'N/A')}")
-
-                        with col3:
-                            st.markdown("**Institution:**")
-                            st.text(f"Name: {anon_dicom.get('InstitutionName', 'N/A')}")
-                            st.text(f"Station: {anon_dicom.get('StationName', 'N/A')}")
-
-                        st.success("All PHI removed successfully!")
-
-            except Exception as e:
-                st.error(f"❌ Error: {str(e)}")
-                st.exception(e)
-
+                    anonymized_files = list(output_dir.glob("*.dcm"))
+                    if anonymized_files:
+                        st.markdown("---")
+                        st.subheader("👁️ Xem trước metadata đã ẩn danh")
+                        preview_dataset = pydicom.dcmread(str(anonymized_files[0]))
+                        render_metadata(preview_dataset)
+                        st.success("✅ File đã không còn thông tin nhận dạng cá nhân.")
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                st.error(f"❌ Đã xảy ra lỗi: {exc}")
 else:
-    st.info("👆 Upload DICOM files to start")
-
-    # Example
+    st.info("👆 Tải lên một hoặc nhiều file DICOM để bắt đầu.")
     st.markdown("---")
-    st.subheader("How to use:")
+    st.subheader("📖 Hướng dẫn nhanh")
     st.markdown(
         """
-    1. Click "Browse files" above
-    2. Select one or more DICOM files (.dcm)
-    3. Review original metadata
-    4. Click "Anonymize Files"
-    5. Download anonymized files as ZIP
-    6. Save ID mapping for your records
-    """
+        1. Nhấn "Browse files" và chọn file DICOM.
+        2. Xem trước metadata của file.
+        3. Nhấn "Ẩn danh hóa file" để xử lý.
+        4. Tải về file ZIP và bảng ánh xạ ID.
+        """
     )
 
-# Footer
 st.markdown("---")
-st.caption("⚠️ Always keep ID mapping secure and separate from anonymized files")
+st.caption(
+    "💡 Lưu ý: Giữ bảng ánh xạ ID riêng biệt với file đã ẩn danh để tuân thủ quy định."
+)

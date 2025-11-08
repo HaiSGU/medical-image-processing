@@ -1,10 +1,10 @@
 """
-MRI Reconstruction Page
+Trang Tái tạo MRI
 
-Reconstruct MRI images from K-space data using FFT.
+Tái tạo ảnh MRI từ dữ liệu K-space sử dụng FFT.
 
-Author: HaiSGU
-Date: 2025-10-28
+Tác giả: HaiSGU
+Ngày: 2025-10-28
 """
 
 import streamlit as st
@@ -23,7 +23,7 @@ from src.reconstruction.mri_reconstruction import MRIReconstructor
 from utils.file_io import MedicalImageIO
 
 # Page config
-st.set_page_config(page_title="MRI Reconstruction", layout="wide")
+st.set_page_config(page_title="🧲 Tái tạo MRI", layout="wide")
 
 # Initialize session state
 if "mri_kspace" not in st.session_state:
@@ -34,8 +34,8 @@ if "mri_phase" not in st.session_state:
     st.session_state.mri_phase = None
 
 # Header
-st.title("MRI Reconstruction")
-st.markdown("Reconstruct MRI images from K-space data using FFT")
+st.title("🧲 Tái tạo MRI")
+st.markdown("Tái tạo ảnh MRI từ dữ liệu K-space sử dụng FFT")
 
 # Info
 with st.expander("About MRI & K-space"):

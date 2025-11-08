@@ -9,7 +9,7 @@ This module provides utilities for:
 """
 
 import logging
-from typing import Tuple, Union, Optional, List
+from typing import Tuple, Union, Optional
 import numpy as np
 import SimpleITK as sitk
 from PIL import Image
@@ -61,7 +61,7 @@ def numpy_to_sitk(
             sitk_img.SetDirection(direction)
 
         logger.info(
-            f"Converted NumPy to SimpleITK: {array.shape} -> {sitk_img.GetSize()}"
+            f"Converted NumPy to SimpleITK: {array.shape} -> " f"{sitk_img.GetSize()}"
         )
         return sitk_img
 
@@ -551,7 +551,8 @@ def pad_array(
         for current, target in zip(current_shape, target_shape):
             if target < current:
                 raise ValueError(
-                    f"Target shape {target_shape} smaller than current {current_shape}"
+                    f"Target shape {target_shape} smaller than current "
+                    f"{current_shape}"
                 )
             total_pad = target - current
             pad_before = total_pad // 2

@@ -1,10 +1,10 @@
 """
-Image Preprocessing Page
+Trang Tiền xử lý Ảnh
 
-Apply various preprocessing operations to medical images.
+Áp dụng các phép tiền xử lý cho ảnh y tế.
 
-Author: HaiSGU
-Date: 2025-10-28
+Tác giả: HaiSGU
+Ngày: 2025-10-28
 """
 
 import streamlit as st
@@ -26,7 +26,7 @@ from src.preprocessing.image_transforms import ImageTransforms
 from utils.file_io import MedicalImageIO
 
 # Page config
-st.set_page_config(page_title="Image Preprocessing", layout="wide")
+st.set_page_config(page_title="⚙️ Tiền xử lý Ảnh", layout="wide")
 
 # Initialize session state
 if "prep_image" not in st.session_state:
@@ -37,8 +37,8 @@ if "prep_operations" not in st.session_state:
     st.session_state.prep_operations = []
 
 # Header
-st.title("Image Preprocessing")
-st.markdown("Transform and enhance medical images for analysis")
+st.title("⚙️ Tiền xử lý Ảnh")
+st.markdown("Biến đổi và nâng cao chất lượng ảnh y tế để phân tích")
 
 # Info
 with st.expander("About Preprocessing"):
@@ -84,68 +84,68 @@ st.markdown("---")
 
 # Sidebar
 with st.sidebar:
-    st.header("Operations")
+    st.header("⚙️ Các phép toán")
 
-    st.markdown("### Intensity")
+    st.markdown("### Cường độ")
 
-    normalize_enabled = st.checkbox("Normalize", value=False)
+    normalize_enabled = st.checkbox("Chuẩn hóa", value=False)
     if normalize_enabled:
         norm_method = st.selectbox(
-            "Method:",
-            ["Min-Max (0-1)", "Z-Score", "Percentile Clipping"],
-            help="Normalization method",
+            "Phương pháp:",
+            ["Min-Max (0-1)", "Z-Score", "Cắt phân vị"],
+            help="Phương pháp chuẩn hóa",
         )
 
-        if norm_method == "Percentile Clipping":
-            lower_p = st.slider("Lower percentile", 0, 50, 2)
-            upper_p = st.slider("Upper percentile", 50, 100, 98)
+        if norm_method == "Cắt phân vị":
+            lower_p = st.slider("Phân vị dưới", 0, 50, 2)
+            upper_p = st.slider("Phân vị trên", 50, 100, 98)
 
-    enhance_enabled = st.checkbox("Enhance Contrast", value=False)
+    enhance_enabled = st.checkbox("Tăng cường Tương phản", value=False)
     if enhance_enabled:
         enhance_method = st.selectbox(
-            "Method:",
-            ["Histogram Equalization", "CLAHE", "Gamma Correction"],
-            help="Contrast enhancement method",
+            "Phương pháp:",
+            ["Cân bằng Histogram", "CLAHE", "Hiệu chỉnh Gamma"],
+            help="Phương pháp tăng cường tương phản",
         )
 
         if enhance_method == "CLAHE":
-            clip_limit = st.slider("Clip limit", 0.5, 5.0, 2.0, step=0.5)
-        elif enhance_method == "Gamma Correction":
+            clip_limit = st.slider("Giới hạn cắt", 0.5, 5.0, 2.0, step=0.5)
+        elif enhance_method == "Hiệu chỉnh Gamma":
             gamma = st.slider("Gamma", 0.1, 3.0, 1.0, step=0.1)
 
     st.markdown("---")
-    st.markdown("### Spatial")
+    st.markdown("### Không gian")
 
-    resize_enabled = st.checkbox("Resize", value=False)
+    resize_enabled = st.checkbox("Thay đổi kích thước", value=False)
     if resize_enabled:
-        target_size = st.slider("Target size", 64, 512, 256, step=64)
+        target_size = st.slider("Kích thước đích", 64, 512, 256, step=64)
 
-    crop_enabled = st.checkbox("Crop to Content", value=False)
+    crop_enabled = st.checkbox("Cắt theo Nội dung", value=False)
 
     st.markdown("---")
-    st.markdown("### Denoising")
+    st.markdown("### Khử nhiễu")
 
-    denoise_enabled = st.checkbox("Denoise", value=False)
+    denoise_enabled = st.checkbox("Khử nhiễu", value=False)
     if denoise_enabled:
         denoise_method = st.selectbox(
-            "Method:", ["Gaussian", "Median"], help="Denoising method"
+            "Phương pháp:", ["Gaussian", "Median"], help="Phương pháp khử nhiễu"
         )
 
         if denoise_method == "Gaussian":
             sigma = st.slider("Sigma", 0.1, 5.0, 1.0, step=0.1)
         else:
-            kernel_size = st.slider("Kernel size", 3, 11, 5, step=2)
+            kernel_size = st.slider("Kích thước Kernel", 3, 11, 5, step=2)
 
     st.markdown("---")
-    st.info("Enable operations in recommended order")
+    st.info("💡 Bật các phép toán theo thứ tự khuyến nghị")
 
 # Upload
-st.subheader("Upload Image")
+st.subheader("📤 Tải lên Ảnh")
 
 uploaded_file = st.file_uploader(
-    "Choose image file (.nii, .dcm, .nrrd, .mha, .npy)",
+    "Chọn file ảnh (.nii, .dcm, .nrrd, .mha, .npy)",
     type=["nii", "gz", "dcm", "nrrd", "mha", "npy"],
-    help="Upload medical image to preprocess",
+    help="Tải lên ảnh y tế để tiền xử lý",
 )
 
 if uploaded_file:

@@ -6,8 +6,8 @@ in various formats including NIfTI, DICOM, NRRD, MetaImage, and NumPy.
 
 """
 
-import os
 import logging
+import pickle
 from pathlib import Path
 from typing import Tuple, Dict, Optional, Union
 import numpy as np
@@ -318,20 +318,29 @@ class MedicalImageIO:
 
     def _read_numpy(self, file_path: Path) -> Tuple[np.ndarray, Dict]:
         """Read NumPy format."""
+        # Thử đọc không dùng pickle trước (an toàn hơn và nhanh hơn)
         try:
-            image_array = np.load(str(file_path), allow_pickle=True)
+            image_array = np.load(str(file_path), allow_pickle=False)
+            logger.info(f"✅ Loaded NumPy array (no pickle): shape={image_array.shape}")
+        except (ValueError, pickle.UnpicklingError) as e:
+            # File chứa pickled data, thử dùng allow_pickle=True
+            logger.warning(f"⚠️ File contains pickled data, using allow_pickle=True")
+            try:
+                image_array = np.load(str(file_path), allow_pickle=True)
+                logger.info(
+                    f"✅ Loaded NumPy array (with pickle): shape={image_array.shape}"
+                )
+            except Exception as e2:
+                logger.error(f"❌ Error reading NumPy file even with pickle: {e2}")
+                raise
 
-            metadata = {
-                "format": "numpy",
-                "shape": image_array.shape,
-                "dtype": str(image_array.dtype),
-            }
+        metadata = {
+            "format": "numpy",
+            "shape": image_array.shape,
+            "dtype": str(image_array.dtype),
+        }
 
-            logger.info(f"Loaded NumPy array: shape={image_array.shape}")
-            return image_array, metadata
-        except Exception as e:
-            logger.error(f"Error reading NumPy file: {e}")
-            raise
+        return image_array, metadata
 
     def _write_nifti(self, image: np.ndarray, file_path: Path, metadata: Dict) -> None:
         """Write NIfTI format."""
@@ -423,7 +432,9 @@ def read_image(file_path: Union[str, Path]) -> Tuple[np.ndarray, Dict]:
 
 
 def write_image(
-    image: np.ndarray, file_path: Union[str, Path], metadata: Optional[Dict] = None
+    image: np.ndarray,
+    file_path: Union[str, Path],
+    metadata: Optional[Dict] = None,
 ) -> None:
     """
     Convenience function to write a medical image.
