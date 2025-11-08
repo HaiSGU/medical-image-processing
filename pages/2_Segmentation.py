@@ -36,11 +36,11 @@ if "seg_metadata" not in st.session_state:
     st.session_state.seg_metadata = {}
 
 # Header
-st.title("🧠 Phân đoạn Não")
+st.title("Phân đoạn Não")
 st.markdown("Trích xuất các vùng não từ ảnh y tế")
 
 # Info
-with st.expander("📚 Phương pháp Phân đoạn"):
+with st.expander(" Phương pháp Phân đoạn"):
     col1, col2 = st.columns(2)
 
     with col1:
@@ -77,7 +77,7 @@ st.markdown("---")
 
 # Sidebar controls
 with st.sidebar:
-    st.header("⚙️ Cài đặt Phân đoạn")
+    st.header("Cài đặt Phân đoạn")
 
     method = st.selectbox(
         "Phương pháp",
@@ -151,10 +151,10 @@ with st.sidebar:
     )
 
     st.markdown("---")
-    st.info("💡 Thử phương pháp 'Tự động' trước để có kết quả tốt nhất")
+    st.info("Thử phương pháp 'Tự động' trước để có kết quả tốt nhất")
 
 # File upload
-st.subheader("📤 Tải lên Ảnh Y tế")
+st.subheader("Tải lên Ảnh Y tế")
 
 uploaded_file = st.file_uploader(
     "Chọn file (.nii, .nii.gz, .dcm, .nrrd, .mha, .npy)",
@@ -178,7 +178,7 @@ if uploaded_file:
             st.session_state.seg_image_data = image_data
             st.session_state.seg_metadata = metadata
 
-        st.success(f"✅ Đã tải: {uploaded_file.name}")
+        st.success(f" Đã tải: {uploaded_file.name}")
 
         # Show image info
         col1, col2, col3 = st.columns(3)
@@ -187,13 +187,13 @@ if uploaded_file:
         col3.metric("Chiều", f"{metadata['ndim']}D")
 
     except Exception as e:
-        st.error(f"❌ Lỗi khi tải ảnh: {str(e)}")
+        st.error(f" Lỗi khi tải ảnh: {str(e)}")
         st.stop()
 
     st.markdown("---")
 
     # Segmentation button
-    if st.button("🧠 Phân đoạn Não", type="primary", use_container_width=True):
+    if st.button("Phân đoạn Não", type="primary", use_container_width=True):
 
         with st.spinner("Đang phân đoạn..."):
             try:
@@ -257,17 +257,17 @@ if uploaded_file:
                 # Store in session state
                 st.session_state.seg_mask = mask
 
-                st.success("✅ Phân đoạn hoàn tất!")
+                st.success("Phân đoạn hoàn tất!")
 
             except Exception as e:
-                st.error(f"❌ Phân đoạn thất bại: {str(e)}")
+                st.error(f" Phân đoạn thất bại: {str(e)}")
                 st.exception(e)
                 st.stop()
 
     # Display results
     if st.session_state.seg_mask is not None:
         st.markdown("---")
-        st.header("📊 Kết quả Phân đoạn")
+        st.header("Kết quả Phân đoạn")
 
         image_data = st.session_state.seg_image_data
         mask = st.session_state.seg_mask
@@ -287,7 +287,7 @@ if uploaded_file:
         st.markdown("---")
 
         # Visualization
-        st.subheader("👁️ Trực quan hóa")
+        st.subheader("Trực quan hóa")
 
         # View controls
         if image_data.ndim == 3:
@@ -367,7 +367,7 @@ if uploaded_file:
 
         # Download options
         st.markdown("---")
-        st.subheader("📥 Tải về Kết quả")
+        st.subheader("Tải về Kết quả")
 
         col1, col2 = st.columns(2)
 
@@ -378,7 +378,7 @@ if uploaded_file:
             npy_bytes = npy_buffer.getvalue()
 
             st.download_button(
-                label="📥 Tải Mask (.npy)",
+                label=" Tải Mask (.npy)",
                 data=npy_bytes,
                 file_name="mask_phan_doan.npy",
                 mime="application/octet-stream",
@@ -409,17 +409,17 @@ if uploaded_file:
             plt.close(fig_download)
 
             st.download_button(
-                label="📥 Tải Phủ lớp (.png)",
+                label=" Tải Phủ lớp (.png)",
                 data=img_buffer,
                 file_name="phan_doan_phu_lop.png",
                 mime="image/png",
             )
 
 else:
-    st.info("👆 Tải lên ảnh não để bắt đầu phân đoạn")
+    st.info("Tải lên ảnh não để bắt đầu phân đoạn")
 
     st.markdown("---")
-    st.subheader("📖 Hướng dẫn Nhanh")
+    st.subheader("Hướng dẫn Nhanh")
 
     st.markdown(
         """
@@ -445,6 +445,6 @@ else:
 # Footer
 st.markdown("---")
 st.caption(
-    "💡 Mẹo: Thử các phương pháp khác nhau và so sánh kết quả "
+    " Mẹo: Thử các phương pháp khác nhau và so sánh kết quả "
     "để có độ chính xác tốt nhất"
 )

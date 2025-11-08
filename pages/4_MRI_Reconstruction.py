@@ -34,7 +34,7 @@ if "mri_phase" not in st.session_state:
     st.session_state.mri_phase = None
 
 # Header
-st.title("🧲 Tái tạo MRI")
+st.title("Tái tạo MRI")
 st.markdown("Tái tạo ảnh MRI từ dữ liệu K-space sử dụng FFT")
 
 # Info
@@ -80,9 +80,7 @@ st.markdown("---")
 
 # Sidebar controls
 with st.sidebar:
-    st.header("Settings")
-
-    # Data source
+    st.header("# Data source
     data_source = st.radio(
         "Data Source:",
         ["Generate from Image", "Upload K-space"],
@@ -106,11 +104,11 @@ with st.sidebar:
             )
 
     st.markdown("---")
-    st.info("Center of K-space contains most important information")
+    st.info("of K-space contains most important information")
 
 # Main content
 if data_source == "Generate from Image":
-    st.subheader("Generate K-space from Image")
+    st.subheader("K-space from Image")
 
     uploaded_file = st.file_uploader(
         "Upload image (.nii, .dcm, .nrrd, .mha, .npy)",
@@ -141,7 +139,7 @@ if data_source == "Generate from Image":
                 else:
                     image_2d = image_data
 
-            st.success(f"✅ Loaded: {image_2d.shape}")
+            st.success(f" Loaded: {image_2d.shape}")
 
             # Generate K-space button
             if st.button(
@@ -186,14 +184,14 @@ if data_source == "Generate from Image":
                     st.session_state.mri_magnitude = magnitude
                     st.session_state.mri_phase = phase
 
-                st.success("Reconstruction complete!")
+                st.success("complete!")
 
         except Exception as e:
-            st.error(f"❌ Error: {str(e)}")
+            st.error(f" Error: {str(e)}")
             st.exception(e)
 
 else:  # Upload K-space
-    st.subheader("Upload K-space Data")
+    st.subheader("K-space Data")
 
     uploaded_kspace = st.file_uploader(
         "Choose K-space file (.npy)",
@@ -206,14 +204,14 @@ else:  # Upload K-space
             kspace = np.load(io.BytesIO(uploaded_kspace.getvalue()))
 
             if not np.iscomplexobj(kspace):
-                st.warning("K-space should be complex. Converting to complex...")
+                st.warning("should be complex. Converting to complex...")
                 kspace = kspace.astype(np.complex128)
 
             st.session_state.mri_kspace = kspace
-            st.success(f"✅ Loaded K-space: {kspace.shape}")
+            st.success(f" Loaded K-space: {kspace.shape}")
 
             # Reconstruct button
-            if st.button("🧲 Reconstruct", type="primary", use_container_width=True):
+            if st.button("Reconstruct", type="primary", use_container_width=True):
 
                 with st.spinner("Reconstructing..."):
                     reconstructor = MRIReconstructor()
@@ -228,20 +226,18 @@ else:  # Upload K-space
                     st.session_state.mri_magnitude = magnitude
                     st.session_state.mri_phase = phase
 
-                st.success("Reconstruction complete!")
+                st.success("complete!")
 
         except Exception as e:
-            st.error(f"❌ Error loading K-space: {str(e)}")
+            st.error(f" Error loading K-space: {str(e)}")
 
 # Display results
 if st.session_state.mri_kspace is not None:
     st.markdown("---")
-    st.header("Results")
-
-    kspace = st.session_state.mri_kspace
+    st.header("kspace = st.session_state.mri_kspace
 
     # Show K-space
-    st.subheader("K-space (Frequency Domain)")
+    st.subheader("(Frequency Domain)")
 
     # Log magnitude for better visualization
     kspace_log = np.log(np.abs(kspace) + 1)
@@ -262,7 +258,7 @@ if st.session_state.mri_kspace is not None:
     # Show reconstructed images
     if st.session_state.mri_magnitude is not None:
         st.markdown("---")
-        st.subheader("Reconstructed Images")
+        st.subheader("Images")
 
         magnitude = st.session_state.mri_magnitude
         phase = st.session_state.mri_phase
@@ -297,7 +293,7 @@ if st.session_state.mri_kspace is not None:
 
         # Statistics
         st.markdown("---")
-        st.subheader("Image Statistics")
+        st.subheader("Statistics")
 
         col1, col2, col3, col4 = st.columns(4)
 
@@ -308,9 +304,7 @@ if st.session_state.mri_kspace is not None:
 
         # Download
         st.markdown("---")
-        st.subheader("Download")
-
-        col1, col2, col3 = st.columns(3)
+        st.subheader("col1, col2, col3 = st.columns(3)
 
         with col1:
             # Download magnitude
@@ -319,7 +313,7 @@ if st.session_state.mri_kspace is not None:
             npy_bytes = npy_buffer.getvalue()
 
             st.download_button(
-                label="📥 Download Magnitude (.npy)",
+                label=" Download Magnitude (.npy)",
                 data=npy_bytes,
                 file_name="mri_magnitude.npy",
                 mime="application/octet-stream",
@@ -332,7 +326,7 @@ if st.session_state.mri_kspace is not None:
             npy_bytes = npy_buffer.getvalue()
 
             st.download_button(
-                label="📥 Download Phase (.npy)",
+                label=" Download Phase (.npy)",
                 data=npy_bytes,
                 file_name="mri_phase.npy",
                 mime="application/octet-stream",
@@ -350,17 +344,17 @@ if st.session_state.mri_kspace is not None:
             plt.close()
 
             st.download_button(
-                label="📥 Download Magnitude (.png)",
+                label=" Download Magnitude (.png)",
                 data=img_buffer,
                 file_name="mri_magnitude.png",
                 mime="image/png",
             )
 
 else:
-    st.info("👆 Generate K-space or upload data to start")
+    st.info("Generate K-space or upload data to start")
 
     st.markdown("---")
-    st.subheader("Quick Guide")
+    st.subheader("Guide")
 
     st.markdown(
         """
@@ -390,4 +384,4 @@ else:
 
 # Footer
 st.markdown("---")
-st.caption("💡 Tip: Try Partial Fourier to see trade-off between speed and quality")
+st.caption(" Tip: Try Partial Fourier to see trade-off between speed and quality")

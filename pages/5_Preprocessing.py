@@ -26,7 +26,7 @@ from src.preprocessing.image_transforms import ImageTransforms
 from utils.file_io import MedicalImageIO
 
 # Page config
-st.set_page_config(page_title="⚙️ Tiền xử lý Ảnh", layout="wide")
+st.set_page_config(page_title=" Tiền xử lý Ảnh", layout="wide")
 
 # Initialize session state
 if "prep_image" not in st.session_state:
@@ -37,7 +37,7 @@ if "prep_operations" not in st.session_state:
     st.session_state.prep_operations = []
 
 # Header
-st.title("⚙️ Tiền xử lý Ảnh")
+st.title("Tiền xử lý Ảnh")
 st.markdown("Biến đổi và nâng cao chất lượng ảnh y tế để phân tích")
 
 # Info
@@ -84,7 +84,7 @@ st.markdown("---")
 
 # Sidebar
 with st.sidebar:
-    st.header("⚙️ Các phép toán")
+    st.header("Các phép toán")
 
     st.markdown("### Cường độ")
 
@@ -137,10 +137,10 @@ with st.sidebar:
             kernel_size = st.slider("Kích thước Kernel", 3, 11, 5, step=2)
 
     st.markdown("---")
-    st.info("💡 Bật các phép toán theo thứ tự khuyến nghị")
+    st.info("Bật các phép toán theo thứ tự khuyến nghị")
 
 # Upload
-st.subheader("📤 Tải lên Ảnh")
+st.subheader("Tải lên Ảnh")
 
 uploaded_file = st.file_uploader(
     "Chọn file ảnh (.nii, .dcm, .nrrd, .mha, .npy)",
@@ -171,7 +171,7 @@ if uploaded_file:
 
             st.session_state.prep_image = image_2d
 
-        st.success(f"✅ Loaded: {image_2d.shape}")
+        st.success(f" Loaded: {image_2d.shape}")
 
         # Show original
         col1, col2, col3 = st.columns(3)
@@ -180,13 +180,13 @@ if uploaded_file:
         col3.metric("Mean", f"{image_2d.mean():.1f}")
 
     except Exception as e:
-        st.error(f"❌ Error loading image: {str(e)}")
+        st.error(f" Error loading image: {str(e)}")
         st.stop()
 
     st.markdown("---")
 
     # Apply preprocessing button
-    if st.button("⚙️ Apply Preprocessing", type="primary", use_container_width=True):
+    if st.button("Apply Preprocessing", type="primary", use_container_width=True):
 
         with st.spinner("Processing..."):
             try:
@@ -269,22 +269,20 @@ if uploaded_file:
                 st.session_state.prep_processed = processed
                 st.session_state.prep_operations = operations
 
-                st.success("Preprocessing complete!")
+                st.success("complete!")
 
             except Exception as e:
-                st.error(f"❌ Error during preprocessing: {str(e)}")
+                st.error(f" Error during preprocessing: {str(e)}")
                 st.exception(e)
 
     # Display results
     if st.session_state.prep_processed is not None:
         st.markdown("---")
-        st.header("Results")
-
-        original = st.session_state.prep_image
+        st.header("original = st.session_state.prep_image
         processed = st.session_state.prep_processed
 
         # Statistics comparison
-        st.subheader("Statistics Comparison")
+        st.subheader("Comparison")
 
         col1, col2, col3, col4 = st.columns(4)
 
@@ -314,7 +312,7 @@ if uploaded_file:
 
         # Before/After visualization
         st.markdown("---")
-        st.subheader("🔍 Before/After Comparison")
+        st.subheader("Before/After Comparison")
 
         col1, col2 = st.columns(2)
 
@@ -350,7 +348,7 @@ if uploaded_file:
 
         # Histogram comparison
         st.markdown("---")
-        st.subheader("Intensity Distribution")
+        st.subheader("Distribution")
 
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 4))
 
@@ -374,19 +372,17 @@ if uploaded_file:
 
         # Pipeline summary
         st.markdown("---")
-        st.subheader("📋 Pipeline Summary")
+        st.subheader("Pipeline Summary")
 
         if st.session_state.prep_operations:
             for i, op in enumerate(st.session_state.prep_operations, 1):
                 st.markdown(f"{i}. {op}")
         else:
-            st.info("No operations applied")
+            st.info("operations applied")
 
         # Download
         st.markdown("---")
-        st.subheader("Download")
-
-        col1, col2, col3 = st.columns(3)
+        st.subheader("col1, col2, col3 = st.columns(3)
 
         with col1:
             # Download as NumPy
@@ -395,7 +391,7 @@ if uploaded_file:
             npy_bytes = npy_buffer.getvalue()
 
             st.download_button(
-                label="📥 Download Image (.npy)",
+                label=" Download Image (.npy)",
                 data=npy_bytes,
                 file_name="preprocessed_image.npy",
                 mime="application/octet-stream",
@@ -413,7 +409,7 @@ if uploaded_file:
             plt.close()
 
             st.download_button(
-                label="📥 Download Image (.png)",
+                label=" Download Image (.png)",
                 data=img_buffer,
                 file_name="preprocessed_image.png",
                 mime="image/png",
@@ -453,17 +449,17 @@ if uploaded_file:
             json_str = json.dumps(config, indent=2)
 
             st.download_button(
-                label="📥 Download Config (.json)",
+                label=" Download Config (.json)",
                 data=json_str,
                 file_name="pipeline_config.json",
                 mime="application/json",
             )
 
 else:
-    st.info("👆 Upload an image to start preprocessing")
+    st.info("Upload an image to start preprocessing")
 
     st.markdown("---")
-    st.subheader("Quick Guide")
+    st.subheader("Guide")
 
     st.markdown(
         """
@@ -491,4 +487,4 @@ else:
 
 # Footer
 st.markdown("---")
-st.caption("💡 Tip: Apply operations in order - Normalize → Denoise → Resize → Enhance")
+st.caption(" Tip: Apply operations in order - Normalize → Denoise → Resize → Enhance")

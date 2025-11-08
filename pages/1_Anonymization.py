@@ -47,7 +47,7 @@ def show_mapping(mapping: Dict[str, str]) -> None:
     if not mapping:
         return
 
-    st.subheader("🔑 Bảng ánh xạ ID")
+    st.subheader("Bảng ánh xạ ID")
     frame = pd.DataFrame(
         {
             "ID Gốc": list(mapping.keys()),
@@ -58,7 +58,7 @@ def show_mapping(mapping: Dict[str, str]) -> None:
 
     csv_bytes = frame.to_csv(index=False).encode("utf-8")
     st.download_button(
-        label="📥 Tải bảng ánh xạ ID (CSV)",
+        label=" Tải bảng ánh xạ ID (CSV)",
         data=csv_bytes,
         file_name="bang_anh_xa_id.csv",
         mime="text/csv",
@@ -73,7 +73,7 @@ def download_anonymized(output_dir: Path) -> None:
 
     zip_buffer.seek(0)
     st.download_button(
-        label="📥 Tải file đã ẩn danh (ZIP)",
+        label=" Tải file đã ẩn danh (ZIP)",
         data=zip_buffer,
         file_name="dicom_da_an_danh.zip",
         mime="application/zip",
@@ -81,11 +81,11 @@ def download_anonymized(output_dir: Path) -> None:
     )
 
 
-st.set_page_config(page_title="🔒 Ẩn danh hóa DICOM", layout="wide")
-st.title("🔒 Ẩn danh hóa DICOM")
+st.set_page_config(page_title=" Ẩn danh hóa DICOM", layout="wide")
+st.title("Ẩn danh hóa DICOM")
 st.markdown("Xóa thông tin bệnh nhân khỏi file DICOM để bảo mật dữ liệu y tế.")
 
-with st.expander("📋 Những thông tin nào sẽ bị xóa?"):
+with st.expander(" Những thông tin nào sẽ bị xóa?"):
     column_left, column_right = st.columns(2)
     with column_left:
         st.markdown(
@@ -106,7 +106,7 @@ with st.expander("📋 Những thông tin nào sẽ bị xóa?"):
             """
         )
 
-st.sidebar.header("⚙️ Cài đặt")
+st.sidebar.header(" Cài đặt")
 patient_prefix = st.sidebar.text_input(
     "Tiền tố ID ẩn danh",
     value="ANON",
@@ -114,7 +114,7 @@ patient_prefix = st.sidebar.text_input(
 )
 st.sidebar.info("File sẽ được ẩn danh và trả về dưới dạng file ZIP.")
 
-st.subheader("📤 Tải lên file DICOM")
+st.subheader("Tải lên file DICOM")
 uploads = st.file_uploader(
     "Chọn file DICOM",
     type=["dcm"],
@@ -123,18 +123,18 @@ uploads = st.file_uploader(
 )
 
 if uploads:
-    st.success(f"✅ Đã nhận {len(uploads)} file.")
+    st.success(f" Đã nhận {len(uploads)} file.")
 
     try:
         file_bytes = io.BytesIO(uploads[0].getvalue())
         preview = pydicom.dcmread(file_bytes, force=True)
         render_metadata(preview)
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        st.warning(f"⚠️ Không thể đọc metadata: {exc}")
+        st.warning(f" Không thể đọc metadata: {exc}")
 
     st.markdown("---")
 
-    if st.button("🔒 Ẩn danh hóa file", use_container_width=True, type="primary"):
+    if st.button("Ẩn danh hóa file", use_container_width=True, type="primary"):
         with st.spinner("Đang ẩn danh hóa file..."):
             try:
                 with tempfile.TemporaryDirectory() as tmp_dir:
@@ -178,25 +178,25 @@ if uploads:
 
                     show_mapping(mapping)
                     st.markdown("---")
-                    st.subheader("📥 Tải file đã ẩn danh")
+                    st.subheader("Tải file đã ẩn danh")
                     download_anonymized(output_dir)
 
                     anonymized_files = list(output_dir.glob("*.dcm"))
                     if anonymized_files:
                         st.markdown("---")
-                        st.subheader("👁️ Xem trước metadata đã ẩn danh")
+                        st.subheader("Xem trước metadata đã ẩn danh")
                         first_file = str(anonymized_files[0])
                         preview_dataset = pydicom.dcmread(first_file)
                         render_metadata(preview_dataset)
                         st.success(
-                            "✅ File đã không còn " "thông tin nhận dạng cá nhân."
+                            " File đã không còn " "thông tin nhận dạng cá nhân."
                         )
             except Exception as exc:  # pylint: disable=broad-exception-caught
-                st.error(f"❌ Đã xảy ra lỗi: {exc}")
+                st.error(f" Đã xảy ra lỗi: {exc}")
 else:
-    st.info("👆 Tải lên một hoặc nhiều file DICOM để bắt đầu.")
+    st.info("Tải lên một hoặc nhiều file DICOM để bắt đầu.")
     st.markdown("---")
-    st.subheader("📖 Hướng dẫn nhanh")
+    st.subheader("Hướng dẫn nhanh")
     st.markdown(
         """
         1. Nhấn "Browse files" và chọn file DICOM.
@@ -208,6 +208,6 @@ else:
 
 st.markdown("---")
 st.caption(
-    "💡 Lưu ý: Giữ bảng ánh xạ ID riêng biệt với file đã ẩn danh "
+    " Lưu ý: Giữ bảng ánh xạ ID riêng biệt với file đã ẩn danh "
     "để tuân thủ quy định."
 )

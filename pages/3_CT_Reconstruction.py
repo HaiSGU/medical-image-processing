@@ -22,7 +22,7 @@ sys.path.insert(0, str(project_root))
 from src.reconstruction.ct_reconstruction import CTReconstructor
 
 # Page config
-st.set_page_config(page_title="🔬 Tái tạo CT", layout="wide")
+st.set_page_config(page_title=" Tái tạo CT", layout="wide")
 
 
 # Helper functions
@@ -76,11 +76,11 @@ if "ct_reconstructed" not in st.session_state:
     st.session_state.ct_reconstructed = None
 
 # Header
-st.title("🔬 Tái tạo CT")
+st.title("Tái tạo CT")
 st.markdown("Tái tạo ảnh CT từ dữ liệu chiếu (sinogram)")
 
 # Info
-with st.expander("📚 Về Tái tạo CT"):
+with st.expander(" Về Tái tạo CT"):
     col1, col2 = st.columns(2)
 
     with col1:
@@ -120,7 +120,7 @@ st.markdown("---")
 
 # Sidebar controls
 with st.sidebar:
-    st.header("⚙️ Cài đặt")
+    st.header("Cài đặt")
 
     # Data source
     data_source = st.radio(
@@ -159,11 +159,11 @@ with st.sidebar:
         )
 
     st.markdown("---")
-    st.info("💡 Thử FBP với bộ lọc 'ramp' trước để có kết quả tốt nhất")
+    st.info("Thử FBP với bộ lọc 'ramp' trước để có kết quả tốt nhất")
 
 # Main content
 if data_source == "Tạo Phantom":
-    st.subheader("🎯 Shepp-Logan Phantom")
+    st.subheader("Shepp-Logan Phantom")
 
     col1, col2 = st.columns(2)
 
@@ -181,7 +181,7 @@ if data_source == "Tạo Phantom":
         """
         )
 
-    if st.button("🔬 Tạo & Tái tạo", type="primary", use_container_width=True):
+    if st.button("Tạo & Tái tạo", type="primary", use_container_width=True):
 
         with st.spinner("Đang tạo phantom và sinogram..."):
             # Create phantom
@@ -214,10 +214,10 @@ if data_source == "Tạo Phantom":
 
             st.session_state.ct_reconstructed = reconstructed
 
-        st.success("✅ Tái tạo hoàn tất!")
+        st.success("Tái tạo hoàn tất!")
 
 else:  # Upload Sinogram
-    st.subheader("📤 Tải lên Sinogram")
+    st.subheader("Tải lên Sinogram")
 
     uploaded_file = st.file_uploader(
         "Chọn file sinogram (.npy)",
@@ -230,10 +230,10 @@ else:  # Upload Sinogram
             sinogram = np.load(io.BytesIO(uploaded_file.getvalue()))
             st.session_state.ct_sinogram = sinogram
 
-            st.success(f"✅ Loaded sinogram: {sinogram.shape}")
+            st.success(f" Loaded sinogram: {sinogram.shape}")
 
             # Reconstruct button
-            if st.button("🔬 Tái tạo", type="primary", use_container_width=True):
+            if st.button("Tái tạo", type="primary", use_container_width=True):
 
                 with st.spinner(f"Đang tái tạo sử dụng {method}..."):
                     # Create angles for reconstruction
@@ -257,20 +257,18 @@ else:  # Upload Sinogram
 
                     st.session_state.ct_reconstructed = reconstructed
 
-                st.success("✅ Tái tạo hoàn tất!")
+                st.success("Tái tạo hoàn tất!")
 
         except Exception as e:
-            st.error(f"❌ Error loading sinogram: {str(e)}")
+            st.error(f" Error loading sinogram: {str(e)}")
 
 # Display results
 if st.session_state.ct_sinogram is not None:
     st.markdown("---")
-    st.header("Results")
-
-    sinogram = st.session_state.ct_sinogram
+    st.header("sinogram = st.session_state.ct_sinogram
 
     # Show sinogram
-    st.subheader("Sinogram (Projection Data)")
+    st.subheader("(Projection Data)")
 
     fig, ax = plt.subplots(figsize=(10, 6))
     im = ax.imshow(sinogram, cmap="gray", aspect="auto")
@@ -286,7 +284,7 @@ if st.session_state.ct_sinogram is not None:
     # Show reconstruction if available
     if st.session_state.ct_reconstructed is not None:
         st.markdown("---")
-        st.subheader("Reconstructed CT Image")
+        st.subheader("CT Image")
 
         reconstructed = st.session_state.ct_reconstructed
 
@@ -312,7 +310,7 @@ if st.session_state.ct_sinogram is not None:
         # Quality metrics (if phantom available)
         if st.session_state.ct_phantom is not None:
             st.markdown("---")
-            st.subheader("Quality Metrics")
+            st.subheader("Metrics")
 
             phantom = st.session_state.ct_phantom
 
@@ -334,7 +332,7 @@ if st.session_state.ct_sinogram is not None:
 
             # Comparison plot
             st.markdown("---")
-            st.subheader("🔍 Comparison: Original vs Reconstructed")
+            st.subheader("Comparison: Original vs Reconstructed")
 
             fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
@@ -361,9 +359,7 @@ if st.session_state.ct_sinogram is not None:
 
         # Download
         st.markdown("---")
-        st.subheader("Download")
-
-        col1, col2 = st.columns(2)
+        st.subheader("col1, col2 = st.columns(2)
 
         with col1:
             # Download as NumPy
@@ -372,7 +368,7 @@ if st.session_state.ct_sinogram is not None:
             npy_bytes = npy_buffer.getvalue()
 
             st.download_button(
-                label="📥 Download Image (.npy)",
+                label=" Download Image (.npy)",
                 data=npy_bytes,
                 file_name=f"ct_reconstructed_{method.lower()}.npy",
                 mime="application/octet-stream",
@@ -390,17 +386,17 @@ if st.session_state.ct_sinogram is not None:
             plt.close()
 
             st.download_button(
-                label="📥 Download Image (.png)",
+                label=" Download Image (.png)",
                 data=img_buffer,
                 file_name=f"ct_reconstructed_{method.lower()}.png",
                 mime="image/png",
             )
 
 else:
-    st.info("👆 Generate phantom or upload sinogram to start")
+    st.info("Generate phantom or upload sinogram to start")
 
     st.markdown("---")
-    st.subheader("Quick Guide")
+    st.subheader("Guide")
 
     st.markdown(
         """
@@ -427,5 +423,5 @@ else:
 # Footer
 st.markdown("---")
 st.caption(
-    "💡 Tip: Use Shepp-Logan phantom to test different reconstruction parameters"
+    " Tip: Use Shepp-Logan phantom to test different reconstruction parameters"
 )
