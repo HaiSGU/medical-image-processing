@@ -7,20 +7,20 @@ Tác giả: HaiSGU
 Ngày: 2025-10-28
 """
 
-import streamlit as st
+import io
+import sys
 import tempfile
 from pathlib import Path
-import sys
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
+import streamlit as st
 from matplotlib.colors import ListedColormap
-import io
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-# Import from src/ modules
 from src.segmentation.brain_segmentation import BrainSegmentation
 from utils.file_io import MedicalImageIO
 
@@ -445,5 +445,6 @@ else:
 # Footer
 st.markdown("---")
 st.caption(
-    "💡 Mẹo: Thử các phương pháp khác nhau và so sánh kết quả để có độ chính xác tốt nhất"
+    "💡 Mẹo: Thử các phương pháp khác nhau và so sánh kết quả "
+    "để có độ chính xác tốt nhất"
 )

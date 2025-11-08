@@ -126,7 +126,8 @@ if uploads:
     st.success(f"✅ Đã nhận {len(uploads)} file.")
 
     try:
-        preview = pydicom.dcmread(io.BytesIO(uploads[0].getvalue()), force=True)
+        file_bytes = io.BytesIO(uploads[0].getvalue())
+        preview = pydicom.dcmread(file_bytes, force=True)
         render_metadata(preview)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         st.warning(f"⚠️ Không thể đọc metadata: {exc}")
@@ -168,9 +169,11 @@ if uploads:
                     mapping = stats.get("id_mapping", {})
 
                     message = (
-                        "Ẩn danh hóa hoàn tất. Thành công: {} | Thất bại: {} | "
-                        "Số bệnh nhân: {}"
-                    ).format(successes, failures, len(mapping))
+                        "Ẩn danh hóa hoàn tất. "
+                        f"Thành công: {successes} | "
+                        f"Thất bại: {failures} | "
+                        f"Số bệnh nhân: {len(mapping)}"
+                    )
                     st.success(message)
 
                     show_mapping(mapping)
@@ -182,9 +185,12 @@ if uploads:
                     if anonymized_files:
                         st.markdown("---")
                         st.subheader("👁️ Xem trước metadata đã ẩn danh")
-                        preview_dataset = pydicom.dcmread(str(anonymized_files[0]))
+                        first_file = str(anonymized_files[0])
+                        preview_dataset = pydicom.dcmread(first_file)
                         render_metadata(preview_dataset)
-                        st.success("✅ File đã không còn thông tin nhận dạng cá nhân.")
+                        st.success(
+                            "✅ File đã không còn " "thông tin nhận dạng cá nhân."
+                        )
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 st.error(f"❌ Đã xảy ra lỗi: {exc}")
 else:
@@ -202,5 +208,6 @@ else:
 
 st.markdown("---")
 st.caption(
-    "💡 Lưu ý: Giữ bảng ánh xạ ID riêng biệt với file đã ẩn danh để tuân thủ quy định."
+    "💡 Lưu ý: Giữ bảng ánh xạ ID riêng biệt với file đã ẩn danh "
+    "để tuân thủ quy định."
 )
