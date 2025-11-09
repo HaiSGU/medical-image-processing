@@ -80,7 +80,9 @@ st.markdown("---")
 
 # Sidebar controls
 with st.sidebar:
-    st.header("# Data source
+    st.header("Settings")
+
+    # Data source
     data_source = st.radio(
         "Data Source:",
         ["Generate from Image", "Upload K-space"],
@@ -149,7 +151,9 @@ if data_source == "Generate from Image":
             ):
 
                 with st.spinner("Generating K-space..."):
-                    reconstructor = MRIReconstructor()
+                    # Create dummy kspace for initialization
+                    dummy_kspace = np.zeros((2, 2), dtype=np.complex128)
+                    reconstructor = MRIReconstructor(dummy_kspace)
 
                     # Forward FFT: Image → K-space
                     kspace = reconstructor.image_to_kspace(image_2d)
@@ -178,8 +182,8 @@ if data_source == "Generate from Image":
                     )
 
                     # Extract magnitude and phase
-                    magnitude = reconstructor.get_magnitude_image(image_complex)
-                    phase = reconstructor.get_phase_image(image_complex)
+                    magnitude = np.abs(image_complex)
+                    phase = np.angle(image_complex)
 
                     st.session_state.mri_magnitude = magnitude
                     st.session_state.mri_phase = phase
@@ -214,14 +218,14 @@ else:  # Upload K-space
             if st.button("Reconstruct", type="primary", use_container_width=True):
 
                 with st.spinner("Reconstructing..."):
-                    reconstructor = MRIReconstructor()
+                    reconstructor = MRIReconstructor(kspace)
 
                     # Inverse FFT
                     image_complex = reconstructor.kspace_to_image(kspace)
 
                     # Extract magnitude and phase
-                    magnitude = reconstructor.get_magnitude_image(image_complex)
-                    phase = reconstructor.get_phase_image(image_complex)
+                    magnitude = np.abs(image_complex)
+                    phase = np.angle(image_complex)
 
                     st.session_state.mri_magnitude = magnitude
                     st.session_state.mri_phase = phase
@@ -234,10 +238,12 @@ else:  # Upload K-space
 # Display results
 if st.session_state.mri_kspace is not None:
     st.markdown("---")
-    st.header("kspace = st.session_state.mri_kspace
+    st.header("Results")
+
+    kspace = st.session_state.mri_kspace
 
     # Show K-space
-    st.subheader("(Frequency Domain)")
+    st.subheader("K-space (Frequency Domain)")
 
     # Log magnitude for better visualization
     kspace_log = np.log(np.abs(kspace) + 1)
@@ -304,7 +310,9 @@ if st.session_state.mri_kspace is not None:
 
         # Download
         st.markdown("---")
-        st.subheader("col1, col2, col3 = st.columns(3)
+        st.subheader("Download")
+
+        col1, col2, col3 = st.columns(3)
 
         with col1:
             # Download magnitude

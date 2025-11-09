@@ -275,7 +275,40 @@ class MedicalImageIO:
     def _read_nrrd(self, file_path: Path) -> Tuple[np.ndarray, Dict]:
         """Read NRRD format using SimpleITK."""
         try:
-            img = sitk.ReadImage(str(file_path))
+            # Convert to absolute path with proper encoding for Windows
+            abs_path = file_path.resolve()
+
+            # Try reading with different path formats
+            try:
+                # First try: normal string path
+                img = sitk.ReadImage(str(abs_path))
+            except Exception as e1:
+                logger.warning(f"First attempt failed, trying alternative: {e1}")
+                try:
+                    # Second try: use forward slashes
+                    path_str = str(abs_path).replace("\\", "/")
+                    img = sitk.ReadImage(path_str)
+                except Exception as e2:
+                    logger.warning(f"Second attempt failed, trying bytes: {e2}")
+                    # Third try: Read as bytes and save to temp with simple name
+                    import tempfile
+
+                    with open(abs_path, "rb") as f:
+                        data = f.read()
+                    with tempfile.NamedTemporaryFile(
+                        delete=False, suffix=".nrrd", mode="wb"
+                    ) as tmp:
+                        tmp.write(data)
+                        tmp_path = tmp.name
+                    img = sitk.ReadImage(tmp_path)
+                    # Clean up temp file
+                    import os
+
+                    try:
+                        os.unlink(tmp_path)
+                    except:
+                        pass
+
             image_array = sitk.GetArrayFromImage(img)
 
             metadata = {
@@ -297,7 +330,17 @@ class MedicalImageIO:
     def _read_metaimage(self, file_path: Path) -> Tuple[np.ndarray, Dict]:
         """Read MetaImage format (.mha, .mhd)."""
         try:
-            img = sitk.ReadImage(str(file_path))
+            # Convert to absolute path
+            abs_path = file_path.resolve()
+
+            # Try different path formats for Windows compatibility
+            try:
+                img = sitk.ReadImage(str(abs_path))
+            except Exception:
+                # Try with forward slashes
+                path_str = str(abs_path).replace("\\", "/")
+                img = sitk.ReadImage(path_str)
+
             image_array = sitk.GetArrayFromImage(img)
 
             metadata = {

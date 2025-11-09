@@ -29,17 +29,17 @@ env/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# Data files (only large files in pathology)
+# Data files - Git LFS will handle these
+# Only ignore temp/output files and VERY large archives
+data/test_output/
+data/ml/
+data/anonym/full_archive.npz
+
+# Ignore tiff images (pathology - too large)
+data/anonym/tiff_images/
 data/pathology/*.tiff
 data/pathology/*.tif
 data/pathology/*.svs
-
-# Large data files (optional - comment out if you want to track them)
-# *.nrrd
-# *.dcm
-# *.mha
-# *.nii
-# *.npy
 
 # IDE
 .vscode/

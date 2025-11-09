@@ -192,39 +192,39 @@ if uploaded_file:
             try:
                 processed = image_2d.copy()
                 operations = []
-                transformer = ImageTransforms()
+
+                # Initialize transformer with image
+                transformer = ImageTransforms(processed)
 
                 # 1. Normalize
                 if normalize_enabled:
+                    # Re-initialize transformer with current processed image
+                    transformer = ImageTransforms(processed)
+
                     if norm_method == "Min-Max (0-1)":
-                        processed = transformer.normalize_intensity(
-                            processed, method="minmax"
-                        )
+                        processed = transformer.normalize_minmax(0.0, 1.0)
                         operations.append("Normalize (Min-Max)")
 
                     elif norm_method == "Z-Score":
-                        processed = transformer.normalize_intensity(
-                            processed, method="zscore"
-                        )
+                        processed = transformer.normalize_zscore()
                         operations.append("Normalize (Z-Score)")
 
                     else:  # Percentile Clipping
-                        processed = transformer.normalize_intensity(
-                            processed,
-                            method="percentile",
-                            percentile_range=(lower_p, upper_p),
+                        processed = transformer.normalize_percentile(
+                            lower_percentile=lower_p, upper_percentile=upper_p
                         )
                         operations.append(f"Normalize (Percentile {lower_p}-{upper_p})")
 
                 # 2. Denoise
                 if denoise_enabled:
+                    # Re-initialize transformer with current processed image
+                    transformer = ImageTransforms(processed)
+
                     if denoise_method == "Gaussian":
-                        processed = filters.gaussian(processed, sigma=sigma)
+                        processed = transformer.denoise_gaussian(sigma=sigma)
                         operations.append(f"Gaussian Blur (σ={sigma})")
                     else:  # Median
-                        processed = filters.median(
-                            processed, footprint=np.ones((kernel_size, kernel_size))
-                        )
+                        processed = transformer.denoise_median(size=kernel_size)
                         operations.append(f"Median Filter (k={kernel_size})")
 
                 # 3. Resize
@@ -251,17 +251,20 @@ if uploaded_file:
 
                 # 5. Enhance contrast
                 if enhance_enabled:
-                    if enhance_method == "Histogram Equalization":
-                        processed = exposure.equalize_hist(processed)
+                    # Re-initialize transformer with current processed image
+                    transformer = ImageTransforms(processed)
+
+                    if enhance_method == "Cân bằng Histogram":
+                        processed = transformer.histogram_equalization()
                         operations.append("Histogram Equalization")
 
                     elif enhance_method == "CLAHE":
-                        processed = exposure.equalize_adapthist(
-                            processed, clip_limit=clip_limit
+                        processed = transformer.adaptive_histogram_equalization(
+                            clip_limit=clip_limit
                         )
                         operations.append(f"CLAHE (clip={clip_limit})")
 
-                    else:  # Gamma
+                    else:  # Gamma - use skimage since not in transformer
                         processed = exposure.adjust_gamma(processed, gamma)
                         operations.append(f"Gamma Correction (γ={gamma})")
 
@@ -278,7 +281,9 @@ if uploaded_file:
     # Display results
     if st.session_state.prep_processed is not None:
         st.markdown("---")
-        st.header("original = st.session_state.prep_image
+        st.header("Results")
+
+        original = st.session_state.prep_image
         processed = st.session_state.prep_processed
 
         # Statistics comparison
@@ -382,7 +387,9 @@ if uploaded_file:
 
         # Download
         st.markdown("---")
-        st.subheader("col1, col2, col3 = st.columns(3)
+        st.subheader("Download")
+
+        col1, col2, col3 = st.columns(3)
 
         with col1:
             # Download as NumPy

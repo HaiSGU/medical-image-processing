@@ -184,7 +184,7 @@ if uploaded_file:
         col1, col2, col3 = st.columns(3)
         col1.metric("Kích thước", f"{' × '.join(map(str, metadata['shape']))}")
         col2.metric("Kiểu dữ liệu", metadata["dtype"])
-        col3.metric("Chiều", f"{metadata['ndim']}D")
+        col3.metric("Chiều", f"{len(metadata['shape'])}D")
 
     except Exception as e:
         st.error(f" Lỗi khi tải ảnh: {str(e)}")
@@ -197,20 +197,18 @@ if uploaded_file:
 
         with st.spinner("Đang phân đoạn..."):
             try:
-                # Create segmenter
-                segmenter = BrainSegmentation()
+                # Create segmenter with image data
+                segmenter = BrainSegmentation(image_data)
 
                 # Run segmentation based on method
                 if method_en == "Automatic":
-                    mask = segmenter.segment_brain(image_data)
+                    mask = segmenter.threshold_otsu()
 
                 elif method_en == "Threshold":
-                    mask = segmenter.threshold_segmentation(
-                        image_data, threshold=threshold
-                    )
+                    mask = segmenter.threshold_manual(threshold=threshold)
 
                 elif method_en == "Otsu":
-                    mask = segmenter.otsu_segmentation(image_data)
+                    mask = segmenter.threshold_otsu()
 
                 elif method_en == "Region Growing":
                     # Convert percentage to actual coordinates
@@ -225,10 +223,9 @@ if uploaded_file:
                     if len(shape) == 2:
                         seed = seed[:2]
 
-                    mask = segmenter.region_growing_segmentation(
-                        image_data,
-                        seed_point=tuple(seed),
-                        intensity_tolerance=intensity_tolerance,
+                    mask = segmenter.region_growing(
+                        seed=tuple(seed),
+                        tolerance=intensity_tolerance,
                     )
 
                 # Apply morphological operations
@@ -242,17 +239,27 @@ if uploaded_file:
                             mask, kernel_size=kernel_size
                         )
                     elif morph_op_en == "dilation":
-                        mask = segmenter.morphological_dilation(
-                            mask, kernel_size=kernel_size
-                        )
+                        # Use closing without erosion
+                        from skimage import morphology
+
+                        if image_data.ndim == 2:
+                            kernel = morphology.disk(kernel_size)
+                        else:
+                            kernel = morphology.ball(kernel_size)
+                        mask = morphology.binary_dilation(mask, kernel).astype(np.uint8)
                     elif morph_op_en == "erosion":
-                        mask = segmenter.morphological_erosion(
-                            mask, kernel_size=kernel_size
-                        )
+                        # Use opening without dilation
+                        from skimage import morphology
+
+                        if image_data.ndim == 2:
+                            kernel = morphology.disk(kernel_size)
+                        else:
+                            kernel = morphology.ball(kernel_size)
+                        mask = morphology.binary_erosion(mask, kernel).astype(np.uint8)
 
                 # Keep largest component
                 if keep_largest:
-                    mask = segmenter.keep_largest_component(mask)
+                    mask = segmenter.get_largest_component(mask)
 
                 # Store in session state
                 st.session_state.seg_mask = mask

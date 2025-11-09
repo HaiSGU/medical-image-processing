@@ -265,10 +265,12 @@ else:  # Upload Sinogram
 # Display results
 if st.session_state.ct_sinogram is not None:
     st.markdown("---")
-    st.header("sinogram = st.session_state.ct_sinogram
+    st.header("Results")
+
+    sinogram = st.session_state.ct_sinogram
 
     # Show sinogram
-    st.subheader("(Projection Data)")
+    st.subheader("Sinogram (Projection Data)")
 
     fig, ax = plt.subplots(figsize=(10, 6))
     im = ax.imshow(sinogram, cmap="gray", aspect="auto")
@@ -359,7 +361,9 @@ if st.session_state.ct_sinogram is not None:
 
         # Download
         st.markdown("---")
-        st.subheader("col1, col2 = st.columns(2)
+        st.subheader("Download")
+
+        col1, col2 = st.columns(2)
 
         with col1:
             # Download as NumPy
@@ -422,6 +426,4 @@ else:
 
 # Footer
 st.markdown("---")
-st.caption(
-    " Tip: Use Shepp-Logan phantom to test different reconstruction parameters"
-)
+st.caption(" Tip: Use Shepp-Logan phantom to test different reconstruction parameters")
