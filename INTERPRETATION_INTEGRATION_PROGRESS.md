@@ -323,9 +323,10 @@ Mỗi page mất ~15-20 phút để integrate.
 
 ---
 
-## 🎉 INTEGRATION COMPLETE! 
+## 🎉 INTEGRATION COMPLETE + CLEANUP DONE! 
 
 **Status:** 5/5 pages complete ✅✅✅✅✅
+**Cleanup:** All duplicate files removed ✅
 
 ### Summary of Changes:
 
@@ -358,3 +359,33 @@ Mỗi page mất ~15-20 phút để integrate.
 **Total Integration Time:** ~45 minutes
 **Files Modified:** 5 page files + 1 progress doc
 **Lines Added:** ~250 lines of interpretation code
+
+---
+
+## 🧹 CLEANUP COMPLETED (Nov 12, 2025)
+
+### Files Removed:
+1. ❌ **`5_Preprocessing.py`** (root folder - duplicate)
+2. ❌ **`1_Anonymization.py`** (root folder - duplicate)  
+3. ❌ **`2_Segmentation.py`** (root folder - duplicate)
+4. ❌ **`3_CT_Reconstruction.py`** (root folder - duplicate)
+5. ❌ **`4_MRI_Reconstruction.py`** (root folder - duplicate)
+6. ❌ **`pages/5_Preprocessing_Enhanced.py`** (redundant - kept simpler version with interpretation)
+7. ❌ **`pages/6_Interpretation_Report.py`** (demo only - interpretation now integrated in all 5 pages)
+
+### Final Structure:
+```
+pages/
+├── 1_Anonymization.py          ✅ (with interpretation)
+├── 2_Segmentation.py            ✅ (with interpretation)
+├── 3_CT_Reconstruction.py       ✅ (with interpretation)
+├── 4_MRI_Reconstruction.py      ✅ (with interpretation)
+└── 5_Preprocessing.py           ✅ (with interpretation)
+```
+
+### Benefits:
+- ✅ No duplicate pages error in Streamlit
+- ✅ Clean project structure
+- ✅ All 5 pages have interpretation integrated
+- ✅ Easy to maintain
+- ✅ No confusion about which file to edit
