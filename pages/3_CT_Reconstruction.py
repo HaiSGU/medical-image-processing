@@ -20,6 +20,11 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from src.reconstruction.ct_reconstruction import CTReconstructor
+from utils.interpretation import (
+    ResultVisualizer,
+    MetricsExplainer,
+    show_interpretation_section,
+)
 
 # Page config
 st.set_page_config(page_title=" Tái tạo CT", layout="wide")
@@ -394,6 +399,74 @@ if st.session_state.ct_sinogram is not None:
                 data=img_buffer,
                 file_name=f"ct_reconstructed_{method.lower()}.png",
                 mime="image/png",
+            )
+
+        # Interpretation section
+        st.markdown("---")
+        st.subheader("📊 Giải thích kết quả tái tạo CT")
+
+        # Compare with phantom if available
+        if st.session_state.ct_phantom is not None:
+            visualizer = ResultVisualizer()
+
+            phantom = st.session_state.ct_phantom
+
+            # Resize if needed
+            if phantom.shape != reconstructed.shape:
+                from skimage.transform import resize
+
+                phantom = resize(phantom, reconstructed.shape, anti_aliasing=True)
+
+            # Normalize images to [0, 1] for visualization
+            phantom_norm = (phantom - phantom.min()) / (
+                phantom.max() - phantom.min() + 1e-8
+            )
+            recon_norm = (reconstructed - reconstructed.min()) / (
+                reconstructed.max() - reconstructed.min() + 1e-8
+            )
+
+            # Show comparison
+            visualizer.compare_images(
+                phantom_norm,
+                recon_norm,
+                title_before="Phantom gốc",
+                title_after=f"CT tái tạo ({method})",
+                description=(
+                    f"Tái tạo từ {sinogram.shape[0]} góc quét. "
+                    f"Phương pháp {method}: "
+                    f"{'Nhanh nhưng có thể có artifacts' if method == 'FBP' else 'Chất lượng cao hơn nhưng chậm hơn'}."
+                ),
+            )
+
+            # Calculate quality metrics using normalized data
+            from skimage.metrics import (
+                peak_signal_noise_ratio,
+                structural_similarity,
+                mean_squared_error,
+            )
+
+            psnr = peak_signal_noise_ratio(phantom_norm, recon_norm, data_range=1.0)
+            ssim = structural_similarity(phantom_norm, recon_norm, data_range=1.0)
+            mse = mean_squared_error(phantom_norm, recon_norm)
+            snr = psnr - 10  # Approximation
+
+            metrics = {"PSNR": psnr, "SSIM": ssim, "MSE": mse, "SNR": snr}
+
+            # Show metrics dashboard
+            explainer = MetricsExplainer()
+            explainer.show_metrics_dashboard(metrics)
+
+            # Show interpretation
+            info_dict = {"method": method, "num_angles": sinogram.shape[0]}
+
+            # Add method-specific parameters
+            if method == "FBP" and "filter_type" in locals():
+                info_dict["filter"] = filter_type
+            elif method == "SART" and "num_iterations" in locals():
+                info_dict["iterations"] = num_iterations
+
+            show_interpretation_section(
+                task_type="reconstruction", metrics=metrics, image_info=info_dict
             )
 
 else:

@@ -21,6 +21,11 @@ sys.path.insert(0, str(project_root))
 # Import from src/ modules
 from src.reconstruction.mri_reconstruction import MRIReconstructor
 from utils.file_io import MedicalImageIO
+from utils.interpretation import (
+    ResultVisualizer,
+    MetricsExplainer,
+    show_interpretation_section,
+)
 
 # Page config
 st.set_page_config(page_title="🧲 Tái tạo MRI", layout="wide")
@@ -151,6 +156,9 @@ if data_source == "Generate from Image":
             ):
 
                 with st.spinner("Generating K-space..."):
+                    # Save original image for comparison
+                    st.session_state.mri_original_image = image_2d
+
                     # Create dummy kspace for initialization
                     dummy_kspace = np.zeros((2, 2), dtype=np.complex128)
                     reconstructor = MRIReconstructor(dummy_kspace)
@@ -356,6 +364,83 @@ if st.session_state.mri_kspace is not None:
                 data=img_buffer,
                 file_name="mri_magnitude.png",
                 mime="image/png",
+            )
+
+        # Interpretation section
+        st.markdown("---")
+        st.subheader("📊 Giải thích kết quả tái tạo MRI")
+
+        # Check if we have original image for comparison
+        if data_source == "Generate from Image" and hasattr(
+            st.session_state, "mri_original_image"
+        ):
+            visualizer = ResultVisualizer()
+
+            original = st.session_state.mri_original_image
+
+            # Normalize images to [0, 1] for visualization and comparison
+            orig_norm = (original - original.min()) / (
+                original.max() - original.min() + 1e-8
+            )
+            mag_norm = (magnitude - magnitude.min()) / (
+                magnitude.max() - magnitude.min() + 1e-8
+            )
+
+            # Compare original with magnitude
+            pf_info = ""
+            if partial_fourier:
+                pf_info = f" với Partial Fourier ({pf_percentage}%)"
+
+            visualizer.compare_images(
+                orig_norm,
+                mag_norm,
+                title_before="MRI gốc",
+                title_after="MRI tái tạo",
+                description=(
+                    f"Tái tạo từ K-space{pf_info}. "
+                    "Magnitude hiển thị cấu trúc giải phẫu. "
+                    "Phase chứa thông tin về dòng chảy và nhiệt độ."
+                ),
+            )
+
+            # Calculate quality metrics
+            from skimage.metrics import (
+                peak_signal_noise_ratio,
+                structural_similarity,
+                mean_squared_error,
+            )
+
+            psnr = peak_signal_noise_ratio(orig_norm, mag_norm, data_range=1.0)
+            ssim = structural_similarity(orig_norm, mag_norm, data_range=1.0)
+            mse = mean_squared_error(orig_norm, mag_norm)
+            snr = psnr - 10  # Approximation
+
+            metrics = {"PSNR": psnr, "SSIM": ssim, "MSE": mse, "SNR": snr}
+
+            # Show metrics dashboard
+            explainer = MetricsExplainer()
+            explainer.show_metrics_dashboard(metrics)
+
+            # Show interpretation
+            info_dict = {
+                "method": "Inverse FFT with K-space",
+                "partial_fourier": partial_fourier,
+            }
+            if partial_fourier:
+                info_dict["sampling_rate"] = pf_percentage
+
+            show_interpretation_section(
+                task_type="reconstruction", metrics=metrics, image_info=info_dict
+            )
+        else:
+            # No comparison possible, just explain the results
+            st.info(
+                "💡 **Giải thích kết quả:**\n\n"
+                "- **Magnitude (Biên độ):** Hiển thị cấu trúc giải phẫu như xương, mô, dịch.\n"
+                "- **Phase (Pha):** Chứa thông tin về dòng máu, nhiệt độ, và chuyển động.\n"
+                "- **K-space:** Miền tần số chứa dữ liệu thô từ máy MRI.\n"
+                "- **FFT:** Chuyển đổi từ K-space sang ảnh có thể nhìn thấy.\n\n"
+                "⚠️ Đây là công cụ hỗ trợ, không thay thế chẩn đoán y khoa chuyên nghiệp."
             )
 
 else:

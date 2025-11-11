@@ -611,3 +611,18 @@ def extract_slice(
     except Exception as e:
         logger.error(f"Error extracting slice: {e}")
         raise
+
+
+# Alias for backward compatibility
+def normalize_image(array: np.ndarray, method: str = "min-max") -> np.ndarray:
+    """
+    Alias for normalize_array (backward compatibility).
+
+    Args:
+        array: Input array
+        method: Normalization method
+
+    Returns:
+        Normalized array
+    """
+    return normalize_array(array, method=method)

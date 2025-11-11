@@ -25,6 +25,13 @@ sys.path.insert(0, str(project_root))
 from src.preprocessing.image_transforms import ImageTransforms
 from utils.file_io import MedicalImageIO
 
+# Import interpretation components
+from utils.interpretation import (
+    ResultVisualizer,
+    MetricsExplainer,
+    show_interpretation_section,
+)
+
 # Page config
 st.set_page_config(page_title=" Tiền xử lý Ảnh", layout="wide")
 
@@ -350,6 +357,59 @@ if uploaded_file:
                 f"Shape: {processed.shape} | "
                 f"Range: [{processed.min():.1f}, {processed.max():.1f}]"
             )
+
+        # Advanced interpretation section
+        st.markdown("---")
+        st.subheader("📊 Image Quality Metrics & Interpretation")
+
+        # Calculate quality metrics
+        from skimage.metrics import (
+            peak_signal_noise_ratio as psnr_calc,
+            structural_similarity as ssim_calc,
+            mean_squared_error as mse_calc,
+        )
+
+        try:
+            # Normalize both images to same range for fair comparison
+            orig_norm = (original - original.min()) / (original.max() - original.min())
+            proc_norm = (processed - processed.min()) / (
+                processed.max() - processed.min()
+            )
+
+            # Calculate metrics
+            psnr = psnr_calc(orig_norm, proc_norm, data_range=1.0)
+            ssim = ssim_calc(orig_norm, proc_norm, data_range=1.0)
+            mse = mse_calc(orig_norm, proc_norm)
+
+            # Calculate SNR (Signal-to-Noise Ratio)
+            signal_power = np.mean(proc_norm**2)
+            noise_power = np.mean((proc_norm - orig_norm) ** 2)
+            snr = (
+                10 * np.log10(signal_power / noise_power)
+                if noise_power > 0
+                else float("inf")
+            )
+
+            metrics = {"PSNR": psnr, "SSIM": ssim, "MSE": mse, "SNR": snr}
+
+            # Show metrics dashboard
+            explainer = MetricsExplainer()
+            explainer.show_metrics_dashboard(metrics)
+
+            # Generate interpretation
+            st.markdown("---")
+            show_interpretation_section(
+                task_type="preprocessing",
+                metrics=metrics,
+                image_info={
+                    "operations": st.session_state.prep_operations,
+                    "shape": processed.shape,
+                    "dtype": str(processed.dtype),
+                },
+            )
+
+        except Exception as e:
+            st.warning(f"⚠️ Could not calculate some metrics: {str(e)}")
 
         # Histogram comparison
         st.markdown("---")

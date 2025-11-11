@@ -25,6 +25,13 @@ sys.path.insert(0, str(project_root))
 from src.preprocessing.image_transforms import ImageTransforms
 from utils.file_io import MedicalImageIO
 
+# Import interpretation components
+from utils.interpretation import (
+    ResultVisualizer,
+    MetricsExplainer,
+    show_interpretation_section,
+)
+
 # Page config
 st.set_page_config(page_title=" Tiền xử lý Ảnh", layout="wide")
 
@@ -348,9 +355,65 @@ if uploaded_file:
                 f"Range: [{processed.min():.1f}, {processed.max():.1f}]"
             )
 
+        # Enhanced Comparison with Interpretation
+        st.markdown("---")
+        st.subheader("🔍 So sánh Chi tiết")
+
+        visualizer = ResultVisualizer()
+        visualizer.compare_images(
+            original,
+            processed,
+            title_before="Ảnh gốc",
+            title_after="Ảnh đã xử lý",
+            description="Ảnh đã được cải thiện chất lượng thông qua các bước tiền xử lý. "
+            "Các chi tiết mô và cấu trúc giờ đây rõ ràng hơn, giúp dễ dàng phân tích.",
+        )
+
+        # Calculate quality metrics
+        st.markdown("---")
+        st.subheader("📊 Chỉ số Chất lượng")
+
+        try:
+            from skimage.metrics import peak_signal_noise_ratio, structural_similarity
+
+            # Normalize images to same range for metrics
+            orig_norm = (original - original.min()) / (original.max() - original.min())
+            proc_norm = (processed - processed.min()) / (
+                processed.max() - processed.min()
+            )
+
+            # Ensure same size
+            if orig_norm.shape != proc_norm.shape:
+                from skimage.transform import resize
+
+                proc_norm = resize(proc_norm, orig_norm.shape, anti_aliasing=True)
+
+            psnr = peak_signal_noise_ratio(orig_norm, proc_norm, data_range=1.0)
+            ssim = structural_similarity(orig_norm, proc_norm, data_range=1.0)
+            mse = np.mean((orig_norm - proc_norm) ** 2)
+
+            metrics = {"PSNR": psnr, "SSIM": ssim, "MSE": mse}
+
+            # Show metrics dashboard
+            metrics_explainer = MetricsExplainer()
+            metrics_explainer.show_metrics_dashboard(
+                metrics, title="Đánh giá chất lượng sau xử lý"
+            )
+
+        except Exception as e:
+            st.warning(f"Không thể tính metrics: {e}")
+            metrics = {}
+
+        # Interpretation section
+        show_interpretation_section(
+            task_type="preprocessing",
+            metrics=metrics,
+            image_info={"operations": st.session_state.prep_operations},
+        )
+
         # Histogram comparison
         st.markdown("---")
-        st.subheader("Intensity Distribution")
+        st.subheader("📈 Phân bố Cường độ")
 
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 4))
 

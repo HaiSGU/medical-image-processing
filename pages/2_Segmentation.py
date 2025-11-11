@@ -23,6 +23,11 @@ sys.path.insert(0, str(project_root))
 
 from src.segmentation.brain_segmentation import BrainSegmentation
 from utils.file_io import MedicalImageIO
+from utils.interpretation import (
+    ResultVisualizer,
+    MetricsExplainer,
+    show_interpretation_section,
+)
 
 # Page config
 st.set_page_config(page_title="🧠 Phân đoạn Não", layout="wide")
@@ -421,6 +426,50 @@ if uploaded_file:
                 file_name="phan_doan_phu_lop.png",
                 mime="image/png",
             )
+
+        # Interpretation section
+        st.markdown("---")
+        st.subheader("📊 Giải thích kết quả phân đoạn")
+
+        # Show overlay with legend using interpretation tools
+        visualizer = ResultVisualizer()
+
+        # Get middle slice for visualization
+        if image_data.ndim == 3:
+            mid_z = image_data.shape[2] // 2
+            display_img = image_data[:, :, mid_z]
+            display_mask = mask[:, :, mid_z]
+        else:
+            display_img = image_data
+            display_mask = mask
+
+        # Define labels for brain regions
+        labels = {1: "Vùng não đã phân đoạn (Brain Tissue)"}
+
+        visualizer.show_overlay_with_legend(
+            image=display_img,
+            mask=display_mask,
+            labels=labels,
+            title="Kết quả phân đoạn với chú thích màu",
+        )
+
+        # Calculate metrics if possible (Dice/IoU would need ground truth)
+        # For now, just show region statistics
+        metrics = {}
+
+        # Show interpretation
+        show_interpretation_section(
+            task_type="segmentation",
+            metrics=metrics,
+            image_info={
+                "method": method,
+                "region_percentage": percentage,
+                "segmented_voxels": segmented_voxels,
+                "total_voxels": total_voxels,
+                "morph_applied": apply_morph,
+                "kept_largest": keep_largest,
+            },
+        )
 
 else:
     st.info("Tải lên ảnh não để bắt đầu phân đoạn")

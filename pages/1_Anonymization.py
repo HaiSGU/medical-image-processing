@@ -16,6 +16,8 @@ PROJECT_ROOT = Path(__file__).parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from utils.interpretation import show_interpretation_section
+
 
 def format_tag(dataset: Dataset, tag: str, label: str) -> str:
     value = dataset.get(tag, "N/A")
@@ -188,8 +190,36 @@ if uploads:
                         first_file = str(anonymized_files[0])
                         preview_dataset = pydicom.dcmread(first_file)
                         render_metadata(preview_dataset)
-                        st.success(
-                            " File đã không còn " "thông tin nhận dạng cá nhân."
+                        st.success(" File đã không còn " "thông tin nhận dạng cá nhân.")
+
+                        # Interpretation section
+                        st.markdown("---")
+                        st.subheader("📋 Giải thích kết quả ẩn danh hóa")
+
+                        # Count removed fields
+                        removed_fields = [
+                            "PatientName",
+                            "PatientID",
+                            "PatientBirthDate",
+                            "PatientAge",
+                            "PatientSex",
+                            "PatientAddress",
+                            "ReferringPhysicianName",
+                            "InstitutionName",
+                            "InstitutionAddress",
+                            "StationName",
+                        ]
+
+                        # Show interpretation
+                        show_interpretation_section(
+                            task_type="anonymization",
+                            metrics={},
+                            image_info={
+                                "num_files": successes,
+                                "num_patients": len(mapping),
+                                "fields_removed": removed_fields,
+                                "prefix": patient_prefix,
+                            },
                         )
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 st.error(f" Đã xảy ra lỗi: {exc}")
@@ -208,6 +238,5 @@ else:
 
 st.markdown("---")
 st.caption(
-    " Lưu ý: Giữ bảng ánh xạ ID riêng biệt với file đã ẩn danh "
-    "để tuân thủ quy định."
+    " Lưu ý: Giữ bảng ánh xạ ID riêng biệt với file đã ẩn danh " "để tuân thủ quy định."
 )
