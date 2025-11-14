@@ -30,7 +30,7 @@ from utils.interpretation import (
 )
 
 # Page config
-st.set_page_config(page_title="🧠 Phân đoạn Não", layout="wide")
+st.set_page_config(page_title="Phân đoạn Não", layout="wide")
 
 # Initialize session state
 if "seg_image_data" not in st.session_state:
@@ -168,10 +168,13 @@ uploaded_file = st.file_uploader(
 )
 
 if uploaded_file:
-    # Load image
-    with tempfile.NamedTemporaryFile(
-        delete=False, suffix=Path(uploaded_file.name).suffix
-    ) as tmp_file:
+    # Load image - handle compound extensions like .nii.gz
+    if uploaded_file.name.endswith(".nii.gz"):
+        suffix = ".nii.gz"
+    else:
+        suffix = Path(uploaded_file.name).suffix
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
         tmp_file.write(uploaded_file.getvalue())
         tmp_path = tmp_file.name
 
@@ -429,7 +432,7 @@ if uploaded_file:
 
         # Interpretation section
         st.markdown("---")
-        st.subheader("📊 Giải thích kết quả phân đoạn")
+        st.subheader("Giải thích kết quả phân đoạn")
 
         # Show overlay with legend using interpretation tools
         visualizer = ResultVisualizer()

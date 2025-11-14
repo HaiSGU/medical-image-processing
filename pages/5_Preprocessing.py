@@ -48,41 +48,41 @@ st.title("Tiền xử lý Ảnh")
 st.markdown("Biến đổi và nâng cao chất lượng ảnh y tế để phân tích")
 
 # Info
-with st.expander("About Preprocessing"):
+with st.expander("Về Tiền xử lý"):
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown(
             """
-        **Why Preprocessing?**
+        **Tại sao cần Tiền xử lý?**
         
-        Raw medical images need preparation:
-        - Different intensity ranges
-        - Varying sizes
-        - Scanner noise
-        - Low contrast
+        Ảnh y tế thô cần chuẩn bị:
+        - Dải cường độ khác nhau
+        - Kích thước khác nhau
+        - Nhiễu từ máy quét
+        - Độ tương phản thấp
         
-        **Operations:**
-        - Normalization
-        - Denoising
-        - Resizing
-        - Contrast enhancement
+        **Các phép toán:**
+        - Chuẩn hóa
+        - Giảm nhiễu
+        - Thay đổi kích thước
+        - Tăng cường độ tương phản
         """
         )
 
     with col2:
         st.markdown(
             """
-        **Recommended Order:**
+        **Thứ tự Đề xuất:**
         
-        1. **Normalize** intensities first
-        2. **Denoise** to remove noise
-        3. **Resize** to target size
-        4. **Enhance** contrast last
+        1. **Chuẩn hóa** cường độ trước
+        2. **Giảm nhiễu** để loại bỏ nhiễu
+        3. **Đổi kích thước** về kích cỡ mục tiêu
+        4. **Tăng cường** độ tương phản cuối cùng
         
-        **Tips:**
-        - Apply operations one at a time
-        - Check preview before download
+        **Mẹo:**
+        - Áp dụng từng phép toán một
+        - Kiểm tra trước khi tải về
         - Save pipeline for reuse
         """
         )
@@ -156,15 +156,18 @@ uploaded_file = st.file_uploader(
 )
 
 if uploaded_file:
-    # Load image
-    with tempfile.NamedTemporaryFile(
-        delete=False, suffix=Path(uploaded_file.name).suffix
-    ) as tmp_file:
+    # Load image - handle compound extensions like .nii.gz
+    if uploaded_file.name.endswith(".nii.gz"):
+        suffix = ".nii.gz"
+    else:
+        suffix = Path(uploaded_file.name).suffix
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
         tmp_file.write(uploaded_file.getvalue())
         tmp_path = tmp_file.name
 
     try:
-        with st.spinner("Loading image..."):
+        with st.spinner("Đang tải ảnh..."):
             io_handler = MedicalImageIO()
             image_data, metadata = io_handler.read_image(tmp_path)
 
@@ -187,15 +190,15 @@ if uploaded_file:
         col3.metric("Mean", f"{image_2d.mean():.1f}")
 
     except Exception as e:
-        st.error(f" Error loading image: {str(e)}")
+        st.error(f" Lỗi khi tải ảnh: {str(e)}")
         st.stop()
 
     st.markdown("---")
 
     # Apply preprocessing button
-    if st.button("Apply Preprocessing", type="primary", use_container_width=True):
+    if st.button("Áp dụng Xử lý", type="primary", use_container_width=True):
 
-        with st.spinner("Processing..."):
+        with st.spinner("Đang xử lý..."):
             try:
                 processed = image_2d.copy()
                 operations = []
@@ -288,13 +291,13 @@ if uploaded_file:
     # Display results
     if st.session_state.prep_processed is not None:
         st.markdown("---")
-        st.header("Results")
+        st.header("Kết quả")
 
         original = st.session_state.prep_image
         processed = st.session_state.prep_processed
 
         # Statistics comparison
-        st.subheader("Comparison")
+        st.subheader("So sánh")
 
         col1, col2, col3, col4 = st.columns(4)
 
@@ -324,7 +327,7 @@ if uploaded_file:
 
         # Before/After visualization
         st.markdown("---")
-        st.subheader("Before/After Comparison")
+        st.subheader("So sánh Trước/Sau")
 
         col1, col2 = st.columns(2)
 
@@ -360,7 +363,7 @@ if uploaded_file:
 
         # Advanced interpretation section
         st.markdown("---")
-        st.subheader("📊 Image Quality Metrics & Interpretation")
+        st.subheader("Đánh giá Chất lượng và Giải thích")
 
         # Calculate quality metrics
         from skimage.metrics import (
@@ -409,11 +412,11 @@ if uploaded_file:
             )
 
         except Exception as e:
-            st.warning(f"⚠️ Could not calculate some metrics: {str(e)}")
+            st.warning(f"Không thể tính một số chỉ số: {str(e)}")
 
         # Histogram comparison
         st.markdown("---")
-        st.subheader("Distribution")
+        st.subheader("Phân bố")
 
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 4))
 
@@ -437,7 +440,7 @@ if uploaded_file:
 
         # Pipeline summary
         st.markdown("---")
-        st.subheader("Pipeline Summary")
+        st.subheader("Tổng kết quy trình")
 
         if st.session_state.prep_operations:
             for i, op in enumerate(st.session_state.prep_operations, 1):
@@ -447,7 +450,7 @@ if uploaded_file:
 
         # Download
         st.markdown("---")
-        st.subheader("Download")
+        st.subheader("Tải về")
 
         col1, col2, col3 = st.columns(3)
 
@@ -523,35 +526,37 @@ if uploaded_file:
             )
 
 else:
-    st.info("Upload an image to start preprocessing")
+    st.info("Tải ảnh lên để bắt đầu tiền xử lý")
 
     st.markdown("---")
-    st.subheader("Guide")
+    st.subheader("Hướng dẫn")
 
     st.markdown(
         """
-    **How to use:**
-    1. Upload medical image
-    2. Enable desired operations (sidebar)
-    3. Adjust parameters for each operation
-    4. Click "Apply Preprocessing"
-    5. Compare before/after results
-    6. Download processed image
+    **Cách sử dụng:**
+    1. Tải lên ảnh y tế
+    2. Bật các phép toán mong muốn (thanh bên)
+    3. Điều chỉnh tham số cho mỗi phép toán
+    4. Nhấn "Áp dụng Xử lý"
+    5. So sánh kết quả trước/sau
+    6. Tải về ảnh đã xử lý
     
-    **Recommended workflow:**
-    - Start with **Normalize** (Min-Max)
-    - Add **Denoise** if image is noisy
-    - Use **Resize** to standardize size
-    - Apply **CLAHE** for better contrast
+    **Quy trình đề xuất:**
+    - Bắt đầu với **Chuẩn hóa** (Min-Max)
+    - Thêm **Giảm nhiễu** nếu ảnh nhiễu
+    - Dùng **Thay đổi kích thước** để chuẩn hóa kích cỡ
+    - Áp dụng **CLAHE** để tăng độ tương phản
     
-    **Tips:**
-    - Apply one operation at a time to see effect
-    - Check histogram to verify normalization
-    - Save pipeline config for reproducibility
-    - Use Percentile Clipping for outlier-heavy images
+    **Mẹo:**
+    - Áp dụng từng phép toán một để thấy hiệu quả
+    - Kiểm tra histogram để xác minh chuẩn hóa
+    - Lưu cấu hình quy trình để tái sử dụng
+    - Dùng Percentile Clipping cho ảnh có nhiều giá trị ngoại lai
     """
     )
 
 # Footer
 st.markdown("---")
-st.caption(" Tip: Apply operations in order - Normalize → Denoise → Resize → Enhance")
+st.caption(
+    "Mẹo: Áp dụng các phép toán theo thứ tự - Chuẩn hóa → Giảm nhiễu → Đổi kích thước → Tăng cường"
+)

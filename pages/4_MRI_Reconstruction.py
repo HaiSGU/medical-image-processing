@@ -28,7 +28,7 @@ from utils.interpretation import (
 )
 
 # Page config
-st.set_page_config(page_title="🧲 Tái tạo MRI", layout="wide")
+st.set_page_config(page_title="Tái tạo MRI", layout="wide")
 
 # Initialize session state
 if "mri_kspace" not in st.session_state:
@@ -43,36 +43,36 @@ st.title("Tái tạo MRI")
 st.markdown("Tái tạo ảnh MRI từ dữ liệu K-space sử dụng FFT")
 
 # Info
-with st.expander("About MRI & K-space"):
+with st.expander("Về MRI và K-space"):
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown(
             """
-        **What is K-space?**
+        **K-space là gì?**
         
-        K-space is the **frequency domain** representation 
-        of MRI data collected by the scanner.
+        K-space là biểu diễn **miền tần số** 
+        của dữ liệu MRI thu thập bởi máy quét.
         
-        **Properties:**
-        - Center: Low frequencies (contrast)
-        - Edges: High frequencies (details)
-        - Raw data from MRI scanner
+        **Thuộc tính:**
+        - Trung tâm: Tần số thấp (độ tương phản)
+        - Rìa: Tần số cao (chi tiết)
+        - Dữ liệu thô từ máy quét MRI
         
-        **NOT the actual image!**
-        Need FFT to convert to image.
+        **KHÔNG phải ảnh thực!**
+        Cần FFT để chuyển thành ảnh.
         """
         )
 
     with col2:
         st.markdown(
             """
-        **Reconstruction Process:**
+        **Quy trình Tái tạo:**
         
-        1. **Acquire K-space** (scanner)
+        1. **Thu thập K-space** (máy quét)
         2. **Inverse FFT** (2D)
-        3. **Extract magnitude** (anatomy)
-        4. **Extract phase** (blood flow, etc.)
+        3. **Trích xuất magnitude** (giải phẫu)
+        4. **Trích xuất phase** (dòng máu, v.v.)
         
         **Partial Fourier:**
         - Scan only part of K-space
@@ -85,26 +85,26 @@ st.markdown("---")
 
 # Sidebar controls
 with st.sidebar:
-    st.header("Settings")
+    st.header("Cài đặt")
 
     # Data source
     data_source = st.radio(
-        "Data Source:",
-        ["Generate from Image", "Upload K-space"],
-        help="Create K-space from image or upload real data",
+        "Nguồn dữ liệu:",
+        ["Tạo từ Ảnh", "Tải lên K-space"],
+        help="Tạo K-space từ ảnh hoặc tải dữ liệu thực",
     )
 
     st.markdown("---")
 
     # Reconstruction options
-    if data_source == "Generate from Image":
+    if data_source == "Tạo từ Ảnh":
         partial_fourier = st.checkbox(
-            "Partial Fourier", value=False, help="Simulate faster acquisition"
+            "Partial Fourier", value=False, help="Mô phỏng quét nhanh hơn"
         )
 
         if partial_fourier:
             pf_percentage = st.select_slider(
-                "K-space coverage:",
+                "Phủ K-space:",
                 options=[50, 62.5, 75, 87.5, 100],
                 value=75,
                 help="Percentage of K-space to use",
@@ -114,27 +114,30 @@ with st.sidebar:
     st.info("of K-space contains most important information")
 
 # Main content
-if data_source == "Generate from Image":
-    st.subheader("K-space from Image")
+if data_source == "Tạo từ Ảnh":
+    st.subheader("K-space từ Ảnh")
 
     uploaded_file = st.file_uploader(
-        "Upload image (.nii, .dcm, .nrrd, .mha, .npy)",
+        "Tải ảnh lên (.nii, .dcm, .nrrd, .mha, .npy)",
         type=["nii", "gz", "dcm", "nrrd", "mha", "npy"],
-        help="Upload medical image to generate K-space",
+        help="Tải ảnh y tế lên để tạo K-space",
     )
 
     if uploaded_file:
-        # Load image
+        # Load image - handle compound extensions like .nii.gz
         import tempfile
 
-        with tempfile.NamedTemporaryFile(
-            delete=False, suffix=Path(uploaded_file.name).suffix
-        ) as tmp_file:
+        if uploaded_file.name.endswith(".nii.gz"):
+            suffix = ".nii.gz"
+        else:
+            suffix = Path(uploaded_file.name).suffix
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
             tmp_file.write(uploaded_file.getvalue())
             tmp_path = tmp_file.name
 
         try:
-            with st.spinner("Loading image..."):
+            with st.spinner("Đang tải ảnh..."):
                 io_handler = MedicalImageIO()
                 image_data, metadata = io_handler.read_image(tmp_path)
 
@@ -146,16 +149,16 @@ if data_source == "Generate from Image":
                 else:
                     image_2d = image_data
 
-            st.success(f" Loaded: {image_2d.shape}")
+            st.success(f"Đã tải: {image_2d.shape}")
 
             # Generate K-space button
             if st.button(
-                "🧲 Generate K-space & Reconstruct",
+                "Tạo K-space và Tái tạo",
                 type="primary",
                 use_container_width=True,
             ):
 
-                with st.spinner("Generating K-space..."):
+                with st.spinner("Đang tạo K-space..."):
                     # Save original image for comparison
                     st.session_state.mri_original_image = image_2d
 
@@ -203,12 +206,12 @@ if data_source == "Generate from Image":
             st.exception(e)
 
 else:  # Upload K-space
-    st.subheader("K-space Data")
+    st.subheader("Dữ liệu K-space")
 
     uploaded_kspace = st.file_uploader(
-        "Choose K-space file (.npy)",
+        "Chọn file K-space (.npy)",
         type=["npy"],
-        help="Complex NumPy array (K-space data)",
+        help="Mảng NumPy phức (dữ liệu K-space)",
     )
 
     if uploaded_kspace:
@@ -216,16 +219,16 @@ else:  # Upload K-space
             kspace = np.load(io.BytesIO(uploaded_kspace.getvalue()))
 
             if not np.iscomplexobj(kspace):
-                st.warning("should be complex. Converting to complex...")
+                st.warning("Dữ liệu nên là số phức. Đang chuyển đổi...")
                 kspace = kspace.astype(np.complex128)
 
             st.session_state.mri_kspace = kspace
-            st.success(f" Loaded K-space: {kspace.shape}")
+            st.success(f"Đã tải K-space: {kspace.shape}")
 
             # Reconstruct button
-            if st.button("Reconstruct", type="primary", use_container_width=True):
+            if st.button("Tái tạo", type="primary", use_container_width=True):
 
-                with st.spinner("Reconstructing..."):
+                with st.spinner("Đang tái tạo..."):
                     reconstructor = MRIReconstructor(kspace)
 
                     # Inverse FFT
@@ -238,20 +241,20 @@ else:  # Upload K-space
                     st.session_state.mri_magnitude = magnitude
                     st.session_state.mri_phase = phase
 
-                st.success("complete!")
+                st.success("Hoàn tất!")
 
         except Exception as e:
-            st.error(f" Error loading K-space: {str(e)}")
+            st.error(f"Lỗi khi tải K-space: {str(e)}")
 
 # Display results
 if st.session_state.mri_kspace is not None:
     st.markdown("---")
-    st.header("Results")
+    st.header("Kết quả")
 
     kspace = st.session_state.mri_kspace
 
     # Show K-space
-    st.subheader("K-space (Frequency Domain)")
+    st.subheader("K-space (Miền tần số)")
 
     # Log magnitude for better visualization
     kspace_log = np.log(np.abs(kspace) + 1)
@@ -272,7 +275,7 @@ if st.session_state.mri_kspace is not None:
     # Show reconstructed images
     if st.session_state.mri_magnitude is not None:
         st.markdown("---")
-        st.subheader("Images")
+        st.subheader("Hình ảnh")
 
         magnitude = st.session_state.mri_magnitude
         phase = st.session_state.mri_phase
@@ -307,7 +310,7 @@ if st.session_state.mri_kspace is not None:
 
         # Statistics
         st.markdown("---")
-        st.subheader("Statistics")
+        st.subheader("Thống kê")
 
         col1, col2, col3, col4 = st.columns(4)
 
@@ -318,7 +321,7 @@ if st.session_state.mri_kspace is not None:
 
         # Download
         st.markdown("---")
-        st.subheader("Download")
+        st.subheader("Tải về")
 
         col1, col2, col3 = st.columns(3)
 
@@ -368,7 +371,7 @@ if st.session_state.mri_kspace is not None:
 
         # Interpretation section
         st.markdown("---")
-        st.subheader("📊 Giải thích kết quả tái tạo MRI")
+        st.subheader("Giải thích kết quả tái tạo MRI")
 
         # Check if we have original image for comparison
         if data_source == "Generate from Image" and hasattr(
@@ -435,46 +438,46 @@ if st.session_state.mri_kspace is not None:
         else:
             # No comparison possible, just explain the results
             st.info(
-                "💡 **Giải thích kết quả:**\n\n"
+                "**Giải thích kết quả:**\n\n"
                 "- **Magnitude (Biên độ):** Hiển thị cấu trúc giải phẫu như xương, mô, dịch.\n"
                 "- **Phase (Pha):** Chứa thông tin về dòng máu, nhiệt độ, và chuyển động.\n"
                 "- **K-space:** Miền tần số chứa dữ liệu thô từ máy MRI.\n"
                 "- **FFT:** Chuyển đổi từ K-space sang ảnh có thể nhìn thấy.\n\n"
-                "⚠️ Đây là công cụ hỗ trợ, không thay thế chẩn đoán y khoa chuyên nghiệp."
+                "Đây là công cụ hỗ trợ, không thay thế chẩn đoán y khoa chuyên nghiệp."
             )
 
 else:
-    st.info("Generate K-space or upload data to start")
+    st.info("Tạo K-space hoặc tải dữ liệu lên để bắt đầu")
 
     st.markdown("---")
-    st.subheader("Guide")
+    st.subheader("Hướng dẫn")
 
     st.markdown(
         """
-    **Generate from Image (Demo):**
-    1. Upload medical image (NIfTI, DICOM, etc.)
-    2. Optionally enable Partial Fourier
-    3. Click "Generate K-space & Reconstruct"
-    4. View K-space and reconstructed images
+    **Tạo từ Ảnh (Demo):**
+    1. Tải lên ảnh y tế (NIfTI, DICOM, v.v.)
+    2. Tùy chọn bật Partial Fourier
+    3. Nhấn "Tạo K-space và Tái tạo"
+    4. Xem K-space và ảnh đã tái tạo
     
-    **Upload K-space (Real Data):**
-    1. Select "Upload K-space"
-    2. Upload .npy file (complex array)
-    3. Click "Reconstruct"
-    4. Download magnitude/phase images
+    **Tải lên K-space (Dữ liệu Thực):**
+    1. Chọn "Upload K-space"
+    2. Tải file .npy (mảng số phức)
+    3. Nhấn "Reconstruct"
+    4. Tải về ảnh magnitude/phase
     
-    **Understanding Results:**
-    - **K-space:** Raw frequency data from MRI scanner
-    - **Magnitude:** Anatomical image (what we see)
-    - **Phase:** Additional information (blood flow, etc.)
+    **Hiểu Kết quả:**
+    - **K-space:** Dữ liệu tần số thô từ máy quét MRI
+    - **Magnitude:** Ảnh giải phẫu (những gì ta nhìn thấy)
+    - **Phase:** Thông tin bổ sung (dòng máu, v.v.)
     
     **Partial Fourier:**
-    - Simulates faster MRI acquisition
-    - 75% = 25% faster scan time
-    - 50% = 50% faster (but lower quality)
+    - Mô phỏng quét MRI nhanh hơn
+    - 75% = nhanh hơn 25% thời gian quét
+    - 50% = nhanh hơn 50% (nhưng chất lượng thấp hơn)
     """
     )
 
 # Footer
 st.markdown("---")
-st.caption(" Tip: Try Partial Fourier to see trade-off between speed and quality")
+st.caption("Mẹo: Thử Partial Fourier để thấy sự đánh đổi giữa tốc độ và chất lượng")

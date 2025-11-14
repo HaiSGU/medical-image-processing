@@ -1,191 +1,379 @@
-# Medical Image Processing System
+# Medical Image Processing System# Medical Image Processing System
 
-A comprehensive Python toolkit and web application for medical image processing, featuring file I/O, anonymization, reconstruction, segmentation, and preprocessing capabilities.
 
-![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.28%2B-red)
-![License](https://img.shields.io/badge/License-MIT-green)
 
-## Table of Contents
+Hệ thống xử lý ảnh y tế toàn diện với giao diện web tương tác.A comprehensive Python toolkit and web application for medical image processing, featuring file I/O, anonymization, reconstruction, segmentation, and preprocessing capabilities.
 
-- [Overview](#overview)
+
+
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue)![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
+
+![Streamlit](https://img.shields.io/badge/Streamlit-1.28%2B-red)![Streamlit](https://img.shields.io/badge/Streamlit-1.28%2B-red)
+
+![License](https://img.shields.io/badge/License-MIT-green)![License](https://img.shields.io/badge/License-MIT-green)
+
+
+
+## 🎯 Tổng quan## Table of Contents
+
+
+
+Project cung cấp cả **thư viện Python** và **ứng dụng web** để xử lý ảnh y tế, phù hợp cho sinh viên, nhà nghiên cứu và chuyên gia y tế.- [Overview](#overview)
+
 - [Features](#features)
-- [Demo](#demo)
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Web Application](#web-application)
-- [Python Library Usage](#python-library-usage)
-- [Project Structure](#project-structure)
-- [Supported Formats](#supported-formats)
+
+**Tính năng chính:**- [Demo](#demo)
+
+- 🔐 Ẩn danh hóa DICOM (xóa thông tin cá nhân)- [Installation](#installation)
+
+- 🧠 Phân đoạn não (4 thuật toán)- [Quick Start](#quick-start)
+
+- 💀 Tái tạo CT từ sinogram (FBP, SART)- [Web Application](#web-application)
+
+- 🧲 Tái tạo MRI từ K-space- [Python Library Usage](#python-library-usage)
+
+- 🎨 Tiền xử lý ảnh (normalization, denoising, enhancement)- [Project Structure](#project-structure)
+
+- 📊 Đọc/ghi nhiều định dạng (NIfTI, DICOM, NRRD, MetaImage, NumPy)- [Supported Formats](#supported-formats)
+
 - [Documentation](#documentation)
-- [Contributing](#contributing)
+
+## 🚀 Cài đặt nhanh- [Contributing](#contributing)
+
 - [License](#license)
 
-## Overview
+```bash
 
-This project provides both a **Python library** and an **interactive web application** for medical image processing. Built for researchers, students, and healthcare professionals working with medical imaging data.
+# Clone repository## Overview
 
-**Key Capabilities:**
-- Multi-format medical image I/O (NIfTI, DICOM, NRRD, MetaImage, NumPy)
-- DICOM anonymization (PHI removal)
-- Brain segmentation (4 methods)
+git clone https://github.com/HaiSGU/medical-image-processing.git
+
+cd medical-image-processingThis project provides both a **Python library** and an **interactive web application** for medical image processing. Built for researchers, students, and healthcare professionals working with medical imaging data.
+
+
+
+# Tạo môi trường ảo**Key Capabilities:**
+
+python -m venv venv- Multi-format medical image I/O (NIfTI, DICOM, NRRD, MetaImage, NumPy)
+
+venv\Scripts\activate  # Windows- DICOM anonymization (PHI removal)
+
+# source venv/bin/activate  # Linux/Mac- Brain segmentation (4 methods)
+
 - CT reconstruction from sinograms (FBP, SART)
-- MRI K-space reconstruction
-- Image preprocessing pipeline
+
+# Cài đặt dependencies- MRI K-space reconstruction
+
+pip install -r requirements.txt- Image preprocessing pipeline
+
 - Interactive web interface
 
-## Features
+# Chạy app
+
+streamlit run app.py## Features
+
+```
 
 ### File I/O & Visualization
-- Read/write NIfTI, DICOM, NRRD, MetaImage, NumPy formats
+
+Mở trình duyệt tại: `http://localhost:8501`- Read/write NIfTI, DICOM, NRRD, MetaImage, NumPy formats
+
 - 2D slice viewing with navigation
-- 3D visualization with Plotly
+
+## ✨ Tính năng chi tiết- 3D visualization with Plotly
+
 - Metadata extraction and display
 
-### DICOM Anonymization
-- Remove Protected Health Information (PHI)
-- Batch processing support
+### 1. Ẩn danh hóa DICOM
+
+- Xóa thông tin bệnh nhân (PHI)### DICOM Anonymization
+
+- Xử lý hàng loạt- Remove Protected Health Information (PHI)
+
+- Export ZIP files- Batch processing support
+
 - Customizable patient ID mapping
-- ZIP export for anonymized files
 
-### 3. Phân đoạn Ảnh (Segmentation)
-Tách vùng quan tâm ra khỏi ảnh (ví dụ: tìm vùng não)
+### 2. Phân đoạn Não  - ZIP export for anonymized files
+
+- Ngưỡng thủ công & Otsu
+
+- Region Growing### 3. Phân đoạn Ảnh (Segmentation)
+
+- Tự độngTách vùng quan tâm ra khỏi ảnh (ví dụ: tìm vùng não)
+
 - **Ngưỡng thủ công:** Tự chọn giá trị ngưỡng
-- **Otsu:** Tự động tìm ngưỡng tốt nhất
-- **Region Growing:** Phát triển vùng từ điểm chọn
-- **Tự động:** Phân đoạn não hoàn toàn tự động
 
-### 4. Tái tạo ảnh CT
+### 3. Tái tạo CT- **Otsu:** Tự động tìm ngưỡng tốt nhất
+
+- FBP (4 bộ lọc: ramp, shepp-logan, cosine, hamming)- **Region Growing:** Phát triển vùng từ điểm chọn
+
+- SART (iterative)- **Tự động:** Phân đoạn não hoàn toàn tự động
+
+- Shepp-Logan phantom
+
+- Đo PSNR, SSIM### 4. Tái tạo ảnh CT
+
 Tái tạo ảnh CT từ dữ liệu sinogram (dữ liệu thô từ máy chụp)
-- **FBP (Filtered Backprojection):** Thuật toán tái tạo nhanh
-- **SART:** Thuật toán lặp, chính xác hơn
-- Tạo phantom để test
-- Đo lường chất lượng ảnh tái tạo
+
+### 4. Tái tạo MRI- **FBP (Filtered Backprojection):** Thuật toán tái tạo nhanh
+
+- K-space ↔ Image domain- **SART:** Thuật toán lặp, chính xác hơn
+
+- Magnitude & Phase extraction- Tạo phantom để test
+
+- Partial Fourier- Đo lường chất lượng ảnh tái tạo
+
+- Visualization
 
 ### 5. Tái tạo ảnh MRI
-Tái tạo ảnh MRI từ K-space (dữ liệu tần số)
-- Chuyển đổi từ K-space sang ảnh thực
-- Hiển thị magnitude (độ lớn) và phase (pha)
-- Partial Fourier: tái tạo từ dữ liệu thiếu
-- Trực quan hóa tương tác
+
+### 5. Tiền xử lýTái tạo ảnh MRI từ K-space (dữ liệu tần số)
+
+- **Chuẩn hóa:** Min-Max, Z-Score- Chuyển đổi từ K-space sang ảnh thực
+
+- **Transforms:** Resize, Crop- Hiển thị magnitude (độ lớn) và phase (pha)
+
+- **Khử nhiễu:** Gaussian, Median- Partial Fourier: tái tạo từ dữ liệu thiếu
+
+- **Tăng cường:** Histogram Eq, CLAHE- Trực quan hóa tương tác
+
+- **Augmentation:** Flip, Rotate
 
 ### 6. Tiền xử lý Ảnh
-Cải thiện chất lượng ảnh trước khi phân tích
-- **Chuẩn hóa:** Min-Max, Z-Score
-- **Thay đổi kích thước:** Resize, Crop
-- **Khử nhiễu:** Gaussian blur, Median filter  
-- **Tăng độ tương phản:** Histogram Equalization, CLAHE
-- **Augmentation:** Lật, xoay, thêm nhiễu
 
-### CT Reconstruction
-- **Filtered Backprojection (FBP)** with 4 filters:
-  - Ram-Lak (standard)
-  - Shepp-Logan (smooth)
-  - Cosine (smoother)
-  - Hamming (smoothest)
+## 📊 Dữ liệuCải thiện chất lượng ảnh trước khi phân tích
+
+- **Chuẩn hóa:** Min-Max, Z-Score
+
+Project bao gồm dữ liệu mẫu:- **Thay đổi kích thước:** Resize, Crop
+
+- **Khử nhiễu:** Gaussian blur, Median filter  
+
+```- **Tăng độ tương phản:** Histogram Equalization, CLAHE
+
+data/- **Augmentation:** Lật, xoay, thêm nhiễu
+
+├── anonym/dicom_dir/      # 100 DICOM files
+
+├── sitk/                  # 4 Brain MRI (.nrrd, .mha)### CT Reconstruction
+
+├── medical/               # Sinogram & K-space- **Filtered Backprojection (FBP)** with 4 filters:
+
+├── synthetic_ct/          # CT test data  - Ram-Lak (standard)
+
+├── synthetic_mri/         # MRI test data    - Shepp-Logan (smooth)
+
+└── synthetic_preprocessing/  # Preprocessing test  - Cosine (smoother)
+
+```  - Hamming (smoothest)
+
 - **SART (Simultaneous Algebraic Reconstruction Technique)**
-- Shepp-Logan phantom generation
+
+### File test đề xuất- Shepp-Logan phantom generation
+
 - Quality metrics (PSNR, SSIM)
 
-### MRI Reconstruction
-- K-space to image domain conversion
-- Magnitude and phase extraction
-- Partial Fourier reconstruction
-- Interactive visualization
+| Trang | File | Path |
+
+|-------|------|------|### MRI Reconstruction
+
+| Anonymization | `ID_0000_AGE_0060_CONTRAST_1_CT.dcm` | `data/anonym/dicom_dir/` |- K-space to image domain conversion
+
+| Segmentation | `A1_grayT1.nrrd` | `data/sitk/` |- Magnitude and phase extraction
+
+| CT Reconstruction | Built-in phantom | (không cần upload) |- Partial Fourier reconstruction
+
+| MRI Reconstruction | `A1_grayT1.nrrd` | `data/sitk/` |- Interactive visualization
+
+| Preprocessing | `A1_grayT1.nrrd` | `data/sitk/` |
 
 ### Image Preprocessing
-- **Intensity normalization**: Min-Max, Z-Score, Percentile clipping
+
+## 🧪 Test nhanh (5 phút)- **Intensity normalization**: Min-Max, Z-Score, Percentile clipping
+
 - **Spatial transforms**: Resize, Crop, Pad
-- **Denoising**: Gaussian blur, Median filter
-- **Contrast enhancement**: Histogram Equalization, CLAHE, Gamma correction
-- **Augmentation**: Flip, Rotate, Noise injection
-- Pipeline builder with JSON export
+
+1. **Anonymization:** Upload DICOM → Click Anonymize- **Denoising**: Gaussian blur, Median filter
+
+2. **Segmentation:** Upload `A1_grayT1.nrrd` → Run Segmentation  - **Contrast enhancement**: Histogram Equalization, CLAHE, Gamma correction
+
+3. **CT Reconstruction:** Generate Phantom → FBP → Reconstruct- **Augmentation**: Flip, Rotate, Noise injection
+
+4. **MRI Reconstruction:** Upload ảnh → Auto K-space → Reconstruct- Pipeline builder with JSON export
+
+5. **Preprocessing:** Upload ảnh → Apply CLAHE → Compare
 
 ## Cài đặt
 
+## 📁 Cấu trúc
+
 ### Yêu cầu hệ thống
-- Python 3.9 trở lên
-- Windows/Linux/Mac
 
-### Hướng dẫn cài đặt
+```- Python 3.9 trở lên
 
-**Bước 1: Tải code về**
+medical-image-processing/- Windows/Linux/Mac
+
+├── app.py                 # Web app entry
+
+├── pages/                 # 5 trang chức năng### Hướng dẫn cài đặt
+
+│   ├── 1_Anonymization.py
+
+│   ├── 2_Segmentation.py**Bước 1: Tải code về**
+
+│   ├── 3_CT_Reconstruction.py```bash
+
+│   ├── 4_MRI_Reconstruction.pygit clone https://github.com/HaiSGU/medical-image-processing.git
+
+│   └── 5_Preprocessing.pycd medical-image-processing
+
+├── src/                   # Core modules```
+
+│   ├── anonymization/
+
+│   ├── segmentation/**Bước 2: Tạo môi trường ảo (khuyến nghị)**
+
+│   ├── reconstruction/```bash
+
+│   └── preprocessing/# Tạo môi trường ảo
+
+├── utils/                 # Utilitiespython -m venv venv
+
+│   ├── file_io.py
+
+│   ├── image_utils.py# Kích hoạt môi trường
+
+│   └── interpretation.py# Trên Windows:
+
+├── data/                  # Sample datavenv\Scripts\activate
+
+├── examples/              # Example scripts# Trên Linux/Mac:
+
+└── notebooks/             # Jupyter notebookssource venv/bin/activate
+
+``````
+
+
+
+## 💻 Sử dụng Python Library**Bước 3: Cài đặt thư viện**
+
 ```bash
-git clone https://github.com/HaiSGU/medical-image-processing.git
-cd medical-image-processing
-```
 
-**Bước 2: Tạo môi trường ảo (khuyến nghị)**
-```bash
-# Tạo môi trường ảo
-python -m venv venv
+```pythonpip install -r requirements.txt
 
-# Kích hoạt môi trường
-# Trên Windows:
-venv\Scripts\activate
-# Trên Linux/Mac:
-source venv/bin/activate
-```
+# Đọc ảnh```
 
-**Bước 3: Cài đặt thư viện**
-```bash
-pip install -r requirements.txt
-```
+from utils.file_io import MedicalImageIO
 
-### Các thư viện chính
+io = MedicalImageIO()### Các thư viện chính
+
+image, metadata = io.read_image("brain.nii.gz")
 
 - `streamlit` - Framework tạo web app
-- `numpy` - Tính toán số học
-- `matplotlib` - Vẽ biểu đồ
-- `SimpleITK` - Xử lý ảnh y tế
-- `pydicom` - Đọc/ghi file DICOM
+
+# Phân đoạn- `numpy` - Tính toán số học
+
+from src.segmentation.brain_segmentation import BrainSegmentation- `matplotlib` - Vẽ biểu đồ
+
+seg = BrainSegmentation()- `SimpleITK` - Xử lý ảnh y tế
+
+mask = seg.segment_brain(image, method='auto')- `pydicom` - Đọc/ghi file DICOM
+
 - `nibabel` - Đọc/ghi file NIfTI
-- `scikit-image` - Thuật toán xử lý ảnh
-- `scipy` - Tính toán khoa học
 
-## Cách sử dụng
+# Tái tạo CT- `scikit-image` - Thuật toán xử lý ảnh
 
-### Chạy ứng dụng Web
+from src.reconstruction.ct_reconstruction import CTReconstructor- `scipy` - Tính toán khoa học
 
-**Bước 1: Mở Terminal/Command Prompt**
+recon = CTReconstructor()
 
-**Bước 2: Chạy lệnh**
+ct_image = recon.fbp_reconstruction(sinogram, filter_type='ramp')## Cách sử dụng
+
+
+
+# Tiền xử lý### Chạy ứng dụng Web
+
+from src.preprocessing.image_transforms import ImageTransforms
+
+trans = ImageTransforms()**Bước 1: Mở Terminal/Command Prompt**
+
+normalized = trans.normalize_intensity(image, method='minmax')
+
+```**Bước 2: Chạy lệnh**
+
 ```bash
-streamlit run app.py
+
+## ⚠️ Lưu ýstreamlit run app.py
+
 ```
 
-**Bước 3: Mở trình duyệt**
-- Tự động mở hoặc vào: `http://localhost:8501`
+- **Mục đích:** Học tập & nghiên cứu - KHÔNG dùng cho chẩn đoán thực tế
 
-**Bước 4: Sử dụng**
+- **Python:** Yêu cầu 3.9+**Bước 3: Mở trình duyệt**
+
+- **Data:** Tất cả file mẫu đã có sẵn trong `data/`- Tự động mở hoặc vào: `http://localhost:8501`
+
+
+
+## 🔧 Troubleshooting**Bước 4: Sử dụng**
+
 1. Tải ảnh lên từ máy tính
-2. Xem thông tin và thống kê
-3. Chọn công cụ xử lý ở menu bên trái
-4. Làm theo hướng dẫn trong từng công cụ
+
+**Module not found:**2. Xem thông tin và thống kê
+
+```bash3. Chọn công cụ xử lý ở menu bên trái
+
+pip install -r requirements.txt4. Làm theo hướng dẫn trong từng công cụ
+
+```
 
 ### Ví dụ sử dụng code Python
 
-```python
-# Đọc ảnh y tế
-from utils.file_io import MedicalImageIO
+**Port đã sử dụng:**
 
-io_handler = MedicalImageIO()
-image, metadata = io_handler.read_image("path/to/image.nii")
-print(f"Kích thước ảnh: {image.shape}")
+```bash```python
 
-# Phân đoạn não
+streamlit run app.py --server.port 8502# Đọc ảnh y tế
+
+```from utils.file_io import MedicalImageIO
+
+
+
+**File không đọc được:**io_handler = MedicalImageIO()
+
+- Kiểm tra định dạng (.nii, .dcm, .nrrd, .mha, .npy)image, metadata = io_handler.read_image("path/to/image.nii")
+
+- Thử file khác trong `data/`print(f"Kích thước ảnh: {image.shape}")
+
+
+
+## 📄 License# Phân đoạn não
+
 from src.segmentation.brain_segmentation import BrainSegmentation
 
+MIT License - Tự do sử dụng cho học tập và nghiên cứu.
+
 segmentor = BrainSegmentation(image)
-mask = segmentor.segment(method="automatic")
+
+## 👨‍💻 Tác giảmask = segmentor.segment(method="automatic")
+
 print(f"Đã tìm thấy vùng não với {mask.sum()} pixels")
 
-# Load medical image
-io_handler = MedicalImageIO()
+**HaiSGU**  
+
+- Repository: https://github.com/HaiSGU/medical-image-processing  # Load medical image
+
+- Issues: https://github.com/HaiSGU/medical-image-processing/issuesio_handler = MedicalImageIO()
+
 image, metadata = io_handler.read_image("brain_mri.nii.gz")
 
+---
+
 # Segment brain
-segmenter = BrainSegmentation()
+
+**Made with ❤️ for the medical imaging community**segmenter = BrainSegmentation()
+
 mask = segmenter.segment_brain(image, method='auto')
 
 # Save result

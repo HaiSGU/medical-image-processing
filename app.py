@@ -72,10 +72,13 @@ uploaded_file = st.file_uploader(
 )
 
 if uploaded_file:
-    # Lưu file tạm
-    with tempfile.NamedTemporaryFile(
-        delete=False, suffix=Path(uploaded_file.name).suffix
-    ) as tmp:
+    # Lưu file tạm - handle compound extensions like .nii.gz
+    if uploaded_file.name.endswith(".nii.gz"):
+        suffix = ".nii.gz"
+    else:
+        suffix = Path(uploaded_file.name).suffix
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
         tmp.write(uploaded_file.getvalue())
         tmp_path = tmp.name
 
@@ -102,7 +105,7 @@ if uploaded_file:
     col1, col2, col3, col4 = st.columns(4)
     size_str = " × ".join(map(str, metadata["shape"]))
     col1.metric("Kích thước", size_str)
-    col2.metric("Số chiều", f"{metadata['ndim']}D")
+    col2.metric("Số chiều", f"{image_data.ndim}D")
     col3.metric("Kiểu dữ liệu", metadata["dtype"])
     size_mb = image_data.nbytes / 1024 / 1024
     col4.metric("Dung lượng (MB)", f"{size_mb:.2f}")

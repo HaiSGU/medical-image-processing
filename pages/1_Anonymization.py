@@ -194,7 +194,7 @@ if uploads:
 
                         # Interpretation section
                         st.markdown("---")
-                        st.subheader("📋 Giải thích kết quả ẩn danh hóa")
+                        st.subheader("Giải thích kết quả ẩn danh hóa")
 
                         # Count removed fields
                         removed_fields = [

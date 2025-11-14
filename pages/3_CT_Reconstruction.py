@@ -235,7 +235,7 @@ else:  # Upload Sinogram
             sinogram = np.load(io.BytesIO(uploaded_file.getvalue()))
             st.session_state.ct_sinogram = sinogram
 
-            st.success(f" Loaded sinogram: {sinogram.shape}")
+            st.success(f"Đã tải sinogram: {sinogram.shape}")
 
             # Reconstruct button
             if st.button("Tái tạo", type="primary", use_container_width=True):
@@ -265,17 +265,17 @@ else:  # Upload Sinogram
                 st.success("Tái tạo hoàn tất!")
 
         except Exception as e:
-            st.error(f" Error loading sinogram: {str(e)}")
+            st.error(f"Lỗi khi tải sinogram: {str(e)}")
 
 # Display results
 if st.session_state.ct_sinogram is not None:
     st.markdown("---")
-    st.header("Results")
+    st.header("Kết quả")
 
     sinogram = st.session_state.ct_sinogram
 
     # Show sinogram
-    st.subheader("Sinogram (Projection Data)")
+    st.subheader("Sinogram (Dữ liệu chiếu)")
 
     fig, ax = plt.subplots(figsize=(10, 6))
     im = ax.imshow(sinogram, cmap="gray", aspect="auto")
@@ -291,7 +291,7 @@ if st.session_state.ct_sinogram is not None:
     # Show reconstruction if available
     if st.session_state.ct_reconstructed is not None:
         st.markdown("---")
-        st.subheader("CT Image")
+        st.subheader("Ảnh CT")
 
         reconstructed = st.session_state.ct_reconstructed
 
@@ -317,7 +317,7 @@ if st.session_state.ct_sinogram is not None:
         # Quality metrics (if phantom available)
         if st.session_state.ct_phantom is not None:
             st.markdown("---")
-            st.subheader("Metrics")
+            st.subheader("Chỉ số")
 
             phantom = st.session_state.ct_phantom
 
@@ -339,7 +339,7 @@ if st.session_state.ct_sinogram is not None:
 
             # Comparison plot
             st.markdown("---")
-            st.subheader("Comparison: Original vs Reconstructed")
+            st.subheader("So sánh: Gốc và Tái tạo")
 
             fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
@@ -366,7 +366,7 @@ if st.session_state.ct_sinogram is not None:
 
         # Download
         st.markdown("---")
-        st.subheader("Download")
+        st.subheader("Tải về")
 
         col1, col2 = st.columns(2)
 
@@ -403,7 +403,7 @@ if st.session_state.ct_sinogram is not None:
 
         # Interpretation section
         st.markdown("---")
-        st.subheader("📊 Giải thích kết quả tái tạo CT")
+        st.subheader("Giải thích kết quả tái tạo CT")
 
         # Compare with phantom if available
         if st.session_state.ct_phantom is not None:
@@ -470,33 +470,33 @@ if st.session_state.ct_sinogram is not None:
             )
 
 else:
-    st.info("Generate phantom or upload sinogram to start")
+    st.info("Tạo phantom hoặc tải sinogram lên để bắt đầu")
 
     st.markdown("---")
-    st.subheader("Guide")
+    st.subheader("Hướng dẫn")
 
     st.markdown(
         """
-    **Using Phantom (Demo):**
-    1. Keep "Generate Phantom" selected
-    2. Adjust phantom size and angles
-    3. Click "Generate & Reconstruct"
-    4. Compare FBP vs SART methods
+    **Sử dụng Phantom (Demo):**
+    1. Giữ "Tạo Phantom" được chọn
+    2. Điều chỉnh kích thước phantom và góc quét
+    3. Nhấn "Generate & Reconstruct"
+    4. So sánh phương pháp FBP và SART
     
-    **Using Real Data:**
-    1. Select "Upload Sinogram"
-    2. Upload .npy file with sinogram
-    3. Choose reconstruction method
-    4. Click "Reconstruct"
+    **Sử dụng Dữ liệu Thực:**
+    1. Chọn "Tải lên Sinogram"
+    2. Tải file .npy chứa sinogram
+    3. Chọn phương pháp tái tạo
+    4. Nhấn "Reconstruct"
     
-    **Tips:**
-    - FBP is faster, SART is better quality
-    - More angles = better reconstruction
-    - Try different filters for FBP
-    - SART needs 10-20 iterations typically
+    **Mẹo:**
+    - FBP nhanh hơn, SART chất lượng tốt hơn
+    - Nhiều góc quét = tái tạo tốt hơn
+    - Thử các bộ lọc khác nhau cho FBP
+    - SART thường cần 10-20 lần lặp
     """
     )
 
 # Footer
 st.markdown("---")
-st.caption(" Tip: Use Shepp-Logan phantom to test different reconstruction parameters")
+st.caption("Mẹo: Dùng Shepp-Logan phantom để thử nghiệm các tham số tái tạo khác nhau")

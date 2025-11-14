@@ -53,7 +53,7 @@ class ResultVisualizer:
             st.image(img_after, caption=title_after, use_container_width=True)
 
         if description:
-            st.info(f"📋 **Giải thích:** {description}")
+            st.info(f"**Giải thích:** {description}")
 
     @staticmethod
     def overlay_segmentation(
@@ -432,22 +432,22 @@ class InterpretationGenerator:
     @staticmethod
     def _interpret_anonymization(metrics: Dict, info: Optional[Dict]) -> str:
         """Giải thích kết quả anonymization"""
-        text = "### 🔒 Kết quả Ẩn danh hóa DICOM\n\n"
-        text += "✅ **Hoàn tất:** Tất cả thông tin nhận dạng cá nhân đã được xóa khỏi ảnh y tế.\n\n"
+        text = "### Kết quả Ẩn danh hóa DICOM\n\n"
+        text += "**Hoàn tất:** Tất cả thông tin nhận dạng cá nhân đã được xóa khỏi ảnh y tế.\n\n"
 
         if info and "fields_removed" in info:
-            text += f"📋 **Các trường đã xóa:** {', '.join(info['fields_removed'])}\n\n"
+            text += f"**Các trường đã xóa:** {', '.join(info['fields_removed'])}\n\n"
 
         text += "**Ý nghĩa:** Ảnh này giờ đây an toàn để chia sẻ cho mục đích nghiên cứu hoặc giảng dạy "
         text += "mà không vi phạm quyền riêng tư của bệnh nhân.\n\n"
-        text += "⚠️ **Lưu ý:** Luôn kiểm tra kỹ trước khi chia sẻ dữ liệu y tế."
+        text += "**Lưu ý:** Luôn kiểm tra kỹ trước khi chia sẻ dữ liệu y tế."
 
         return text
 
     @staticmethod
     def _interpret_segmentation(metrics: Dict, info: Optional[Dict]) -> str:
         """Giải thích kết quả segmentation"""
-        text = "### 🧠 Kết quả Phân đoạn ảnh y tế\n\n"
+        text = "### Kết quả Phân đoạn ảnh y tế\n\n"
 
         if "Dice" in metrics:
             dice = metrics["Dice"]
@@ -461,28 +461,26 @@ class InterpretationGenerator:
                 quality = "cần cải thiện"
 
             text += (
-                f"📊 **Độ chính xác:** {dice:.3f} - Chất lượng phân đoạn {quality}.\n\n"
+                f"**Độ chính xác:** {dice:.3f} - Chất lượng phân đoạn {quality}.\n\n"
             )
 
         if info and "region_percentage" in info:
             pct = info["region_percentage"]
-            text += f"📍 **Vùng phát hiện:** Chiếm {pct:.1f}% tổng thể tích ảnh.\n\n"
+            text += f"**Vùng phát hiện:** Chiếm {pct:.1f}% tổng thể tích ảnh.\n\n"
 
         text += "**Ý nghĩa:** Hệ thống đã tự động xác định và tách vùng quan tâm "
         text += (
             "(ví dụ: khối u, mô não) khỏi nền. Vùng được tô màu giúp bác sĩ dễ dàng "
         )
         text += "xác định vị trí và kích thước bất thường.\n\n"
-        text += (
-            "⚠️ **Lưu ý:** Đây chỉ là công cụ hỗ trợ, không thay thế chẩn đoán y khoa."
-        )
+        text += "**Lưu ý:** Đây chỉ là công cụ hỗ trợ, không thay thế chẩn đoán y khoa."
 
         return text
 
     @staticmethod
     def _interpret_reconstruction(metrics: Dict, info: Optional[Dict]) -> str:
         """Giải thích kết quả reconstruction"""
-        text = "### 🔄 Kết quả Tái tạo ảnh\n\n"
+        text = "### Kết quả Tái tạo ảnh\n\n"
 
         if "PSNR" in metrics:
             psnr = metrics["PSNR"]
@@ -495,11 +493,11 @@ class InterpretationGenerator:
             else:
                 quality = "thấp"
 
-            text += f"📊 **Chất lượng tái tạo:** PSNR = {psnr:.2f} dB - Chất lượng {quality}.\n\n"
+            text += f"**Chất lượng tái tạo:** PSNR = {psnr:.2f} dB - Chất lượng {quality}.\n\n"
 
         if "SSIM" in metrics:
             ssim = metrics["SSIM"]
-            text += f"🔍 **Độ tương đồng:** SSIM = {ssim:.3f} - "
+            text += f"**Độ tương đồng:** SSIM = {ssim:.3f} - "
             text += f"Ảnh tái tạo {'rất giống' if ssim > 0.95 else 'tương đối giống'} ảnh gốc.\n\n"
 
         text += (
@@ -511,40 +509,40 @@ class InterpretationGenerator:
         text += "rõ các chi tiết mô, xương, cơ quan nội tạng.\n\n"
 
         if info and "method" in info:
-            text += f"🔧 **Phương pháp:** {info['method']}\n\n"
+            text += f"**Phương pháp:** {info['method']}\n\n"
 
-        text += "⚠️ **Lưu ý:** Các thông số kỹ thuật (góc quét, độ phân giải) ảnh hưởng đến chất lượng."
+        text += "**Lưu ý:** Các thông số kỹ thuật (góc quét, độ phân giải) ảnh hưởng đến chất lượng."
 
         return text
 
     @staticmethod
     def _interpret_preprocessing(metrics: Dict, info: Optional[Dict]) -> str:
         """Giải thích kết quả preprocessing"""
-        text = "### 🎨 Kết quả Tiền xử lý ảnh\n\n"
+        text = "### Kết quả Tiền xử lý ảnh\n\n"
 
         operations = info.get("operations", []) if info else []
 
         if operations:
-            text += "✅ **Các bước đã thực hiện:**\n"
+            text += "**Các bước đã thực hiện:**\n"
             for op in operations:
                 if op == "normalize":
-                    text += "- 📊 Chuẩn hóa độ sáng (giúp ảnh đồng đều)\n"
+                    text += "- Chuẩn hóa độ sáng (giúp ảnh đồng đều)\n"
                 elif op == "denoise":
-                    text += "- 🧹 Giảm nhiễu (làm rõ ảnh)\n"
+                    text += "- Giảm nhiễu (làm rõ ảnh)\n"
                 elif op == "enhance":
-                    text += "- ✨ Tăng độ tương phản (nổi bật chi tiết)\n"
+                    text += "- Tăng độ tương phản (nổi bật chi tiết)\n"
                 elif op == "resize":
-                    text += "- 📐 Thay đổi kích thước\n"
+                    text += "- Thay đổi kích thước\n"
             text += "\n"
 
         if "PSNR" in metrics:
             psnr = metrics["PSNR"]
-            text += f"📊 **Chất lượng:** PSNR = {psnr:.2f} dB\n\n"
+            text += f"**Chất lượng:** PSNR = {psnr:.2f} dB\n\n"
 
         text += "**Ý nghĩa:** Ảnh đã được làm sạch và tối ưu để phục vụ các bước phân tích tiếp theo. "
         text += "Các mô, khối u, hay bất thường sẽ nổi bật rõ ràng hơn.\n\n"
         text += (
-            "⚠️ **Lưu ý:** Tiền xử lý giúp cải thiện độ chính xác của các thuật toán AI."
+            "**Lưu ý:** Tiền xử lý giúp cải thiện độ chính xác của các thuật toán AI."
         )
 
         return text
@@ -723,7 +721,7 @@ class ReportBuilder:
         )
         story.append(
             Paragraph(
-                "⚠️ <b>Lưu ý:</b> Báo cáo này chỉ mang tính chất tham khảo kỹ thuật. "
+                "<b>Lưu ý:</b> Báo cáo này chỉ mang tính chất tham khảo kỹ thuật. "
                 "Không thay thế cho ý kiến chẩn đoán của bác sĩ chuyên khoa.",
                 disclaimer_style,
             )
@@ -824,7 +822,7 @@ class ReportBuilder:
 
         # Metrics
         if metrics:
-            html += '<div class="section"><h2>📊 Chỉ số kỹ thuật</h2><div class="metrics-grid">'
+            html += '<div class="section"><h2>Chỉ số kỹ thuật</h2><div class="metrics-grid">'
 
             for metric_name, value in metrics.items():
                 explanation = MetricsExplainer.explain_metric(metric_name, value)
@@ -846,7 +844,7 @@ class ReportBuilder:
 
         # Interpretation
         html += (
-            f'<div class="section"><h2>📝 Giải thích kết quả</h2>{interpretation}</div>'
+            f'<div class="section"><h2>Giải thích kết quả</h2>{interpretation}</div>'
         )
 
         # Images
@@ -881,7 +879,7 @@ class ReportBuilder:
         # Disclaimer
         html += """
         <div class="disclaimer">
-            <strong>⚠️ Lưu ý:</strong> Báo cáo này chỉ mang tính chất tham khảo kỹ thuật.
+            <strong>Lưu ý:</strong> Báo cáo này chỉ mang tính chất tham khảo kỹ thuật.
             Không thay thế cho ý kiến chẩn đoán của bác sĩ chuyên khoa.
         </div>
         </body>
@@ -906,7 +904,7 @@ def show_interpretation_section(
         image_info: Thông tin bổ sung
     """
     st.markdown("---")
-    st.subheader("💡 Giải thích kết quả")
+    st.subheader("Giải thích kết quả")
 
     interpretation = InterpretationGenerator.generate_interpretation(
         task_type, metrics, image_info
