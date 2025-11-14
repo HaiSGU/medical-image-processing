@@ -3,8 +3,7 @@ Trang Tiền xử lý Ảnh
 
 Áp dụng các phép tiền xử lý cho ảnh y tế.
 
-Tác giả: HaiSGU
-Ngày: 2025-10-28
+
 """
 
 import streamlit as st

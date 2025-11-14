@@ -3,8 +3,7 @@ Trang Tái tạo MRI
 
 Tái tạo ảnh MRI từ dữ liệu K-space sử dụng FFT.
 
-Tác giả: HaiSGU
-Ngày: 2025-10-28
+
 """
 
 import streamlit as st

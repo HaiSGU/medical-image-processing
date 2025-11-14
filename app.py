@@ -3,9 +3,6 @@
 
 Ứng dụng đơn giản giúp hiểu và xử lý ảnh y tế.
 Phù hợp cho người không chuyên ngành y.
-
-Tác giả: HaiSGU
-Ngày: 2025-10-28
 """
 
 import sys

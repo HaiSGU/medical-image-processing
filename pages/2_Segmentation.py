@@ -3,8 +3,6 @@ Trang Phân đoạn Não
 
 Phân đoạn các vùng não từ ảnh y tế sử dụng nhiều phương pháp.
 
-Tác giả: HaiSGU
-Ngày: 2025-10-28
 """
 
 import io

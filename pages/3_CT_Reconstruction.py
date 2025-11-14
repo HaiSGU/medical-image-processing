@@ -3,8 +3,7 @@ Trang Tái tạo CT
 
 Tái tạo ảnh CT từ sinogram sử dụng thuật toán FBP và SART.
 
-Tác giả: HaiSGU
-Ngày: 2025-10-28
+
 """
 
 import io
