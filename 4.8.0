@@ -1,2 +1,0 @@
-Requirement already satisfied: opencv-python in d:\documents\medical image processing\.venv\lib\site-packages (4.12.0.88)
-Requirement already satisfied: numpy<2.3.0,>=2 in d:\documents\medical image processing\.venv\lib\site-packages (from opencv-python) (2.2.6)
