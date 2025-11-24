@@ -119,11 +119,17 @@ class MRIReconstructor:
 
         logger.debug("Converting K-space to image (IFFT2D)")
 
-        # Inverse FFT 2D
-        # fftshift: Đưa zero frequency về center
-        # ifft2: Inverse FFT 2 chiều
-        # ifftshift: Đưa zero frequency về corner (chuẩn cho image)
-        image_complex = np.fft.ifftshift(np.fft.ifft2(np.fft.ifftshift(kspace)))
+        # Inverse FFT 2D - Carpentries Medical Image Processing Standard:
+        # Reference: https://carpentries-incubator.github.io/medical-image-processing/
+        #
+        # Standard: fftshift(ifft2(ifftshift(kspace)))
+        # K-space (DC at center) → ifftshift → K-space (DC at corner)
+        # → ifft2 with ortho norm → Image (corner aligned)
+        # → fftshift → Image (centered)
+        image_complex = np.fft.fftshift(
+            np.fft.ifft2(np.fft.ifftshift(kspace, axes=(-2, -1)), norm="ortho"),
+            axes=(-2, -1),
+        )
 
         return image_complex
 
@@ -150,8 +156,9 @@ class MRIReconstructor:
         """
         logger.debug("Converting image to K-space (FFT2D)")
 
-        # Forward FFT 2D
-        kspace = np.fft.fftshift(np.fft.fft2(np.fft.fftshift(image)))
+        # Forward FFT 2D - Carpentries Standard:
+        # Image → fft2 with ortho → fftshift → K-space (DC at center)
+        kspace = np.fft.fftshift(np.fft.fft2(image, norm="ortho"), axes=(-2, -1))
 
         return kspace
 
@@ -478,8 +485,9 @@ def create_synthetic_kspace(size: int = 256, phantom_type: str = "brain") -> np.
     else:
         raise ValueError(f"Unknown phantom type: {phantom_type}")
 
-    # Convert to K-space
-    kspace = np.fft.fftshift(np.fft.fft2(np.fft.fftshift(image)))
+    # Convert to K-space using Carpentries standard
+    # Forward FFT with orthogonal normalization
+    kspace = np.fft.fftshift(np.fft.fft2(image, norm="ortho"), axes=(-2, -1))
 
     return kspace
 

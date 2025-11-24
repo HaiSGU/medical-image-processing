@@ -25,6 +25,7 @@ from utils.interpretation import (
     MetricsExplainer,
     show_interpretation_section,
 )
+from utils.image_explainer import explain_input_image
 
 # Page config
 st.set_page_config(page_title="Tái tạo MRI", layout="wide")
@@ -449,31 +450,125 @@ else:
     st.info("Tạo K-space hoặc tải dữ liệu lên để bắt đầu")
 
     st.markdown("---")
-    st.subheader("Hướng dẫn")
+    st.subheader("📖 Hướng dẫn Sử dụng Chi tiết")
 
     st.markdown(
         """
-    **Tạo từ Ảnh (Demo):**
-    1. Tải lên ảnh y tế (NIfTI, DICOM, v.v.)
-    2. Tùy chọn bật Partial Fourier
-    3. Nhấn "Tạo K-space và Tái tạo"
-    4. Xem K-space và ảnh đã tái tạo
+    **Các bước thực hiện - Tạo từ Ảnh (Demo):**
+    1. **Tải ảnh**: Upload ảnh y tế (NIfTI, DICOM, NRRD, MHA)
+    2. **Cài đặt Partial Fourier** (tùy chọn):
+       - Bật checkbox để mô phỏng quét MRI nhanh
+       - Chọn % K-space: 75% (khuyến nghị) hoặc 50%
+    3. **Tạo K-space**: Nhấn "Tạo K-space và Tái tạo"
+    4. **Xem kết quả**:
+       - K-space (Log Magnitude): Dữ liệu tần số
+       - Magnitude Image: Ảnh giải phẫu
+       - Phase Image: Thông tin pha
+    5. **Tải về**: Download magnitude .npy hoặc .png
     
     **Tải lên K-space (Dữ liệu Thực):**
-    1. Chọn "Upload K-space"
-    2. Tải file .npy (mảng số phức)
-    3. Nhấn "Reconstruct"
-    4. Tải về ảnh magnitude/phase
+    1. Chọn "Tải lên K-space" từ sidebar
+    2. Upload file .npy chứa dữ liệu K-space:
+       - Format: 2D complex array
+       - Kiểm tra shape hiển thị
+    3. Nhấn "Tái tạo"
+    4. Xem và tải về magnitude/phase images
+    
+    **Hiểu K-space và MRI:**
+    
+    **K-space là gì?**
+    - Biểu diễn **miền tần số ** của dữ liệu MRI
+    - Thu thập trực tiếp từ máy quét MRI
+    - KHÔNG phải ảnh thực - cần FFT để chuyển đổi
+    
+    **Cấu trúc K-space:**
+    - **Trung tâm** (sáng): Tần số thấp → Độ tương phản
+    - **Rìa** (tối): Tần số cao → Chi tiết, ranh giới
+    - **75% trung tâm** chứa **~90% thông tin** quan trọng
+    
+    **Quy trình Tái tạo:**
+    1. Thu thập K-space (máy quét MRI)
+    2. Inverse FFT 2D (K-space → Complex Image)
+    3. Trích xuất **Magnitude** (ảnh giải phẫu)
+    4. Trích xuất **Phase** (dòng máu, nhiệt độ)
     
     **Hiểu Kết quả:**
-    - **K-space:** Dữ liệu tần số thô từ máy quét MRI
-    - **Magnitude:** Ảnh giải phẫu (những gì ta nhìn thấy)
-    - **Phase:** Thông tin bổ sung (dòng máu, v.v.)
     
-    **Partial Fourier:**
-    - Mô phỏng quét MRI nhanh hơn
-    - 75% = nhanh hơn 25% thời gian quét
-    - 50% = nhanh hơn 50% (nhưng chất lượng thấp hơn)
+    **Magnitude Image (Biên độ):**
+    - Ảnh giải phẫu chuẩn (gray/white matter, CSF)
+    -ữu cho chẩn đoán cấu trúc
+    - Những gì bác sĩ thường xem
+    
+    **Phase Image (Pha):**
+    - Thông tin bổ sung về:
+      * Dòng máu (blood flow)
+      * Nhiệt độ mô (temperature)
+      * Độ nhạy từ tính (magnetic susceptibility)
+    - Hữu ích cho: SWI, phase contrast MRI
+    
+    **Partial Fourier - Quét Nhanh:**
+    
+    **Nguyên lý:**
+    - Chỉ thu thập **một phần K-space** (50-87.5%)
+    - Estimate phần còn lại từ tính đối xứng của K-space
+    - **Giảm thời gian quét** tương ứng
+    
+    **Trade-offs:**
+    - **75% K-space**:
+      * ✅ Giảm 25% thời gian → MRI scan nhanh hơn
+      * ✅ Chất lượng vẫn tốt (~95% so với full)
+      * ⚠️ Một chút mất SNR (Signal-to-Noise Ratio)
+    
+    - **50% K-space**:
+      * ✅ Giảm 50% thời gian → MRI rất nhanh
+      * ❌ Chất lượng giảm đáng kể (~80-85%)
+      * ❌ Mất chi tiết, artifacts tăng
+    
+    **Khuyến nghị:**
+    - **Clinical routine**: 75-87.5% (cân bằng tốc độ/chất lượng)
+    - **Research/High quality**: 100% (full K-space)
+    - **Emergency/Pediatric**: 50-62.5% (ưu tiên tốc độ)
+    
+    **Cài đặt Khuyến nghị:**
+    
+    **🎯 Demo/Học tập:**
+    - Dùng: "Tạo từ Ảnh"
+    - Partial Fourier: Thử cả 100%, 75%, 50%
+    - So sánh: Xem sự khác biệt về chất lượng
+    
+    **🔬 Nghiên cứu:**
+    - Dùng: "Tải lên K-space" (dữ liệu thực)
+    - Format: Complex numpy array (.npy)
+    - Post-process: Tải magnitude để phân tích tiếp
+    
+    **Mẹo hữu ích:**
+    - ⭐ **K-space trung tâm**: 10% chiếm 50% thông tin
+    - ⭐ **Partial Fourier**: Real-world MRI thường dùng 75-87.5%
+    - ⭐ **Phase wrapping**: Phase image có giá trị -π đến +π
+    - ⭐ **3D volume**: Tool tự động chọn slice giữa
+    - ⭐ **Log scale**: K-space hiển thị ở log để thấy rõ
+    - ⭐ **Magnitude >> Phase**: Magnitude quan trọng hơn cho chẩn đoán
+    - ⭐ **FFT nhanh**: 512x512 < 1 giây
+    - ⭐ **Combo**: Magnitude + Phase = Susceptibility Weighted Imaging (SWI)
+    
+    **Ứng dụng Thực tế:**
+    - **Compressed Sensing**: Tái tạo từ rất ít K-space (<30%)
+    - **Parallel Imaging**: Kết hợp nhiều coil để quét nhanh
+    - **Motion Correction**: Detect và fix chuyển động từ K-space
+    - **Artifact Correction**: Sửa spike, ghost artifacts
+    
+    **Xử lý Sự cố:**
+    - **Ảnh mờ**: K-space thiếu tần số cao (dùng full 100%)
+    - **Artifacts**: Do Partial Fourier quá thấp (tăng lên 75%)
+    - **Phase lạ**: Bình thường, phase có vẻ noise nhưng chứa info
+    - **File lỗi**: Đảm bảo .npy là complex array, không phải float
+    
+    **Lưu ý Quan trọng:**
+    - ⚠️ Tool này chỉ demo FFT cơ bản
+    - ⚠️ Real MRI phức tạp hơn: gradients, RF pulses, relaxation
+    - ⚠️ Partial Fourier thực tế dùng POCS, GRAPPA, SENSE algorithms
+    - ⚠️ K-space từ máy thực có noise, motion artifacts
+    - ⚠️ Magnitude cần normalization trước dùng trong neural networks
     """
     )
 

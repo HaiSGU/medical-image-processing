@@ -12,8 +12,10 @@ scikit-image>=0.19.0
 openslide-python>=1.1.2
 openslide-bin>=4.0.0
 
-# Machine Learning
+# Machine Learning & Deep Learning
 scikit-learn>=1.0.0
+tensorflow>=2.13.0  # For brain tumor classification (Computer Vision)
+opencv-python>=4.8.0  # For image processing and detection
 
 # Visualization
 ipywidgets>=7.6.0

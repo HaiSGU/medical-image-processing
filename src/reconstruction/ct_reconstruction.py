@@ -54,15 +54,16 @@ class CTReconstructor:
 
         Args:
             sinogram: 2D array of projection data
-                     Shape: (num_angles, num_detectors)
-                     - Mỗi hàng = một góc chiếu
-                     - Mỗi cột = một detector position
+                     Shape: (num_detectors, num_angles)
+                     - Mỗi hàng = một detector position
+                     - Mỗi cột = một góc chiếu
+                     - Đây là format chuẩn của scikit-image
 
             theta: Array of projection angles in degrees
                    Nếu None, tự động tạo từ 0° đến 180°
 
         Example:
-            >>> sinogram = np.random.rand(180, 256)  # 180 angles, 256 detectors
+            >>> sinogram = np.random.rand(256, 180)  # 256 detectors, 180 angles
             >>> reconstructor = CTReconstructor(sinogram)
         """
         self.sinogram = sinogram
@@ -71,7 +72,7 @@ class CTReconstructor:
         if sinogram.ndim != 2:
             raise ValueError(f"Sinogram must be 2D, got shape {sinogram.shape}")
 
-        num_angles, num_detectors = sinogram.shape
+        num_detectors, num_angles = sinogram.shape
 
         # Set projection angles
         if theta is None:
@@ -133,12 +134,11 @@ class CTReconstructor:
 
         try:
             # iradon expects (num_detectors, num_angles)
-            # but our sinogram is (num_angles, num_detectors), so transpose
-            sinogram_for_iradon = self.sinogram.T
+            # Our sinogram is already in this format, no transpose needed
 
             # Use scikit-image's iradon (inverse radon transform)
             reconstruction = iradon(
-                sinogram_for_iradon,
+                self.sinogram,
                 theta=self.theta,
                 filter_name=filter_name,
                 interpolation=interpolation,
@@ -194,17 +194,15 @@ class CTReconstructor:
         logger.info(f"Running SART reconstruction: {iterations} iterations")
 
         if image_size is None:
-            # Auto-determine image size from sinogram
-            image_size = self.sinogram.shape[1]
+            # Auto-determine image size from sinogram (num_detectors)
+            image_size = self.sinogram.shape[0]
 
         try:
             # iradon_sart expects (num_detectors, num_angles)
-            sinogram_for_sart = self.sinogram.T
+            # Our sinogram is already in this format, no transpose needed
 
             # Check for valid sinogram values
-            if np.any(np.isnan(sinogram_for_sart)) or np.any(
-                np.isinf(sinogram_for_sart)
-            ):
+            if np.any(np.isnan(self.sinogram)) or np.any(np.isinf(self.sinogram)):
                 raise ValueError("Sinogram contains NaN or Inf values")
 
             # Initialize with a better starting image (small positive values)
@@ -213,7 +211,7 @@ class CTReconstructor:
 
             # Use scikit-image's iradon_sart with better parameters
             reconstruction = iradon_sart(
-                sinogram_for_sart,
+                self.sinogram,
                 theta=self.theta,
                 image=initial_image,  # Start with small positive values
                 relaxation=relaxation,
@@ -228,7 +226,7 @@ class CTReconstructor:
             # Run multiple iterations
             for i in range(iterations - 1):
                 reconstruction = iradon_sart(
-                    sinogram_for_sart,
+                    self.sinogram,
                     theta=self.theta,
                     image=reconstruction,  # Use previous result
                     relaxation=relaxation,
