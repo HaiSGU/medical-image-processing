@@ -34,16 +34,6 @@ with st.sidebar:
     st.caption("CORE Processing + AI Analysis")
     st.markdown("---")
 
-    st.markdown("### 🚀 Main Workflows")
-    st.page_link("app.py", label="🏠 Home", icon="🏠")
-    st.page_link(
-        "pages/1_Processing_Pipeline.py", label="🔧 CORE Processing", icon="🔧"
-    )
-    st.page_link("pages/2_AI_Analysis.py", label="🧠 AI Analysis", icon="🧠")
-
-    st.markdown("---")
-    st.markdown("### 🔬 Advanced Tools")
-
     st.info(
         """💡 **Tip**: Use the 2-stage workflow for best results:  
     1. CORE Processing → Clean your images  

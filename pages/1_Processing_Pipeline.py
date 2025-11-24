@@ -144,12 +144,6 @@ st.markdown("---")
 
 # ==================== DYNAMIC SIDEBAR ====================
 with st.sidebar:
-    st.markdown("### 🏥 Navigation")
-    st.page_link("app.py", label="🏠 Home")
-    st.page_link("pages/1_Processing_Pipeline.py", label="🔧 CORE Processing")
-    st.page_link("pages/2_AI_Analysis.py", label="🧠 AI Analysis")
-
-    st.markdown("---")
     st.markdown(f"### 🎯 {selected_tool}")
     st.markdown("---")
 

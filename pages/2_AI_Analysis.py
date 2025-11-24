@@ -13,7 +13,14 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 import sys
 import pandas as pd
-import cv2
+
+# Try to import OpenCV
+try:
+    import cv2
+
+    CV2_AVAILABLE = True
+except ImportError:
+    CV2_AVAILABLE = False
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -37,18 +44,12 @@ st.set_page_config(page_title="AI Analysis Pipeline", page_icon="🧠", layout="
 
 # Sidebar Navigation
 with st.sidebar:
-    st.markdown("### 🏥 Navigation")
-    st.page_link("app.py", label="🏠 Home")
-    st.page_link("pages/1_Processing_Pipeline.py", label="🔧 CORE Processing")
-    st.page_link("pages/2_AI_Analysis.py", label="🧠 AI Analysis")
-
-    st.markdown("---")
     st.info(
         """
     💡 **AI Analysis**
-    
+
     Trang này tích hợp tất cả các công cụ Computer Vision và AI.
-    
+
     Sử dụng ảnh đã qua CORE Processing để phân tích.
     """
     )
@@ -61,6 +62,19 @@ Integrated Computer Vision & AI workflow với các công cụ phân tích:
 **Classification** | **Detection** | **Feature Extraction**
 """
 )
+
+# Check OpenCV availability
+if not CV2_AVAILABLE:
+    st.warning(
+        """
+        ⚠️ **OpenCV chưa được cài đặt**
+        
+        Một số tính năng có thể không hoạt động. Để cài đặt OpenCV, chạy:
+        ```bash
+        pip install opencv-python
+        ```
+        """
+    )
 
 # Tabs
 tab1, tab2, tab3 = st.tabs(
